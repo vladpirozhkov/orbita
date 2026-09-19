@@ -39,6 +39,32 @@ ASPECTS = {
     "opposition": (180.0, 8.0),
 }
 
+SIGN_TEXT = {
+    "Aries": ("прямота, инициатива и смелость начинать", "действовать раньше, чем появляется полная ясность"),
+    "Taurus": ("устойчивость, практичность и верность ценностям", "слишком долго держаться за привычное"),
+    "Gemini": ("любознательность, гибкость и лёгкость в общении", "распылять внимание между множеством идей"),
+    "Cancer": ("эмоциональная глубина, забота и сильная память", "закрываться, когда особенно нужна поддержка"),
+    "Leo": ("творческая смелость, щедрость и яркое самовыражение", "зависеть от признания окружающих"),
+    "Virgo": ("наблюдательность, системность и внимание к деталям", "быть чрезмерно критичным к себе"),
+    "Libra": ("дипломатичность, чувство меры и умение видеть обе стороны", "откладывать выбор ради сохранения гармонии"),
+    "Scorpio": ("проницательность, внутренняя сила и способность к трансформации", "усиливать контроль при нехватке доверия"),
+    "Sagittarius": ("широта взгляда, оптимизм и стремление к смыслу", "переоценивать возможности и недооценивать детали"),
+    "Capricorn": ("ответственность, выдержка и умение строить надолго", "мерить собственную ценность только результатами"),
+    "Aquarius": ("независимое мышление, оригинальность и ориентация на будущее", "уходить в дистанцию вместо разговора о чувствах"),
+    "Pisces": ("эмпатия, воображение и тонкое восприятие", "терять границы под влиянием эмоций других людей"),
+}
+
+SIGN_RU = dict(zip(SIGNS, ("Овен", "Телец", "Близнецы", "Рак", "Лев", "Дева", "Весы", "Скорпион", "Стрелец", "Козерог", "Водолей", "Рыбы")))
+PLANET_RU = {"Sun": "Солнце", "Moon": "Луна", "Mercury": "Меркурий", "Venus": "Венера", "Mars": "Марс", "Jupiter": "Юпитер", "Saturn": "Сатурн", "Uranus": "Уран", "Neptune": "Нептун", "Pluto": "Плутон", "True Node": "Северный узел"}
+
+ASPECT_TONE = {
+    "conjunction": (0, "усиливает"),
+    "sextile": (1, "открывает возможность для"),
+    "trine": (1, "поддерживает"),
+    "square": (-1, "создаёт напряжение в теме"),
+    "opposition": (-1, "просит найти баланс в теме"),
+}
+
 
 @dataclass(frozen=True)
 class Position:
@@ -156,4 +182,98 @@ def calculate_natal_chart(
             "vertex": round(angles[3] % 360, 6),
         },
         "aspects": sorted(aspect_rows, key=lambda row: row["orb"]),
+    }
+
+
+def interpret_natal_chart(chart: dict) -> dict:
+    """Build a transparent rule-based interpretation from calculated positions."""
+    sun = chart["planets"]["Sun"]
+    moon = chart["planets"]["Moon"]
+    asc_sign = SIGNS[int(chart["angles"]["ascendant"] // 30)]
+    sun_strength, sun_risk = SIGN_TEXT[sun["sign"]]
+    moon_strength, moon_risk = SIGN_TEXT[moon["sign"]]
+    asc_strength, _ = SIGN_TEXT[asc_sign]
+    tense = [row for row in chart["aspects"] if row["type"] in {"square", "opposition"}][:3]
+    supportive = [row for row in chart["aspects"] if row["type"] in {"trine", "sextile"}][:3]
+    return {
+        "headline": f"{sun_strength.capitalize()} — ядро карты; {asc_strength} заметны во внешнем стиле.",
+        "identity": (
+            f"Солнце в знаке {SIGN_RU[sun['sign']]} и в {sun['house']} доме связывает чувство себя с темами "
+            f"этого дома. Ваш естественный ресурс — {sun_strength}."
+        ),
+        "emotions": (
+            f"Луна в знаке {SIGN_RU[moon['sign']]} и в {moon['house']} доме показывает эмоциональную потребность "
+            f"в безопасном проявлении таких качеств, как {moon_strength}."
+        ),
+        "social_style": f"Асцендент в знаке {SIGN_RU[asc_sign]}: первое впечатление и способ входить в новые ситуации — {asc_strength}.",
+        "growth": f"Зоны роста карты: не {sun_risk}; в эмоциональных решениях — не {moon_risk}.",
+        "supportive_aspects": supportive,
+        "tense_aspects": tense,
+        "method": "Rule-based interpretation of Swiss Ephemeris positions",
+    }
+
+
+def calculate_daily_forecast(chart: dict, forecast_date: datetime) -> dict:
+    """Calculate daily transits to natal planets and turn them into a short forecast."""
+    local_date = forecast_date.date()
+    noon_utc = datetime(local_date.year, local_date.month, local_date.day, 12, tzinfo=timezone.utc)
+    hour = noon_utc.hour
+    jd_ut = swe.julday(noon_utc.year, noon_utc.month, noon_utc.day, hour, swe.GREG_CAL)
+    transit_bodies = {name: body for name, body in PLANETS.items() if name in {"Sun", "Moon", "Mercury", "Venus", "Mars"}}
+    transits = {}
+    for name, body in transit_bodies.items():
+        values, _ = swe.calc_ut(jd_ut, body, swe.FLG_SWIEPH | swe.FLG_SPEED)
+        transits[name] = _position(values)
+
+    hits = []
+    for transit_name, transit in transits.items():
+        for natal_name, natal in chart["planets"].items():
+            separation = _angular_distance(transit.longitude, natal["longitude"])
+            for aspect_name, (exact, _) in ASPECTS.items():
+                orb = abs(separation - exact)
+                if orb <= 2.5:
+                    tone, verb = ASPECT_TONE[aspect_name]
+                    hits.append({
+                        "transit": transit_name,
+                        "natal": natal_name,
+                        "type": aspect_name,
+                        "orb": round(orb, 2),
+                        "tone": tone,
+                        "text": f"{PLANET_RU[transit_name]} {verb} натальную тему «{PLANET_RU[natal_name]}»",
+                    })
+                    break
+    hits.sort(key=lambda row: row["orb"])
+    selected = hits[:5]
+    scores = {"relationships": 6, "work": 6, "energy": 6}
+    for row in selected:
+        impact = row["tone"]
+        if row["transit"] in {"Venus", "Moon"} or row["natal"] in {"Venus", "Moon"}:
+            scores["relationships"] += impact
+        if row["transit"] == "Mercury" or row["natal"] in {"Mercury", "Jupiter", "Saturn"}:
+            scores["work"] += impact
+        if row["transit"] in {"Sun", "Mars"} or row["natal"] in {"Sun", "Mars"}:
+            scores["energy"] += impact
+    scores = {key: max(1, min(10, value)) for key, value in scores.items()}
+    if selected:
+        supportive_count = sum(row["tone"] > 0 for row in selected)
+        tense_count = sum(row["tone"] < 0 for row in selected)
+        if supportive_count > tense_count:
+            headline = "День для поступательного движения"
+            summary = "Поддерживающие транзиты помогают использовать сильные стороны карты. Выберите одно направление и закрепите результат действием."
+        elif tense_count > supportive_count:
+            headline = "День требует точности и паузы"
+            summary = "Напряжённые транзиты усиливают внутренние противоречия. Проверяйте факты и не превращайте первую эмоциональную реакцию в окончательное решение."
+        else:
+            headline = "День настройки баланса"
+            summary = "В карте дня сочетаются поддержка и напряжение. Лучше чередовать активность с короткими паузами и не перегружать расписание."
+    else:
+        headline = "Спокойный транзитный фон"
+        summary = "Точных сильных аспектов к натальной карте сегодня немного. Это хороший день для привычных задач и восстановления ресурса."
+    return {
+        "date": local_date.isoformat(),
+        "headline": headline,
+        "summary": summary,
+        "scores": scores,
+        "transits": selected,
+        "method": "Swiss Ephemeris transits at 12:00 UTC, 2.5° orb",
     }
