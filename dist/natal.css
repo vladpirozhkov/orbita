@@ -38,6 +38,17 @@
 .reading-card summary b{color:var(--gold);font-size:20px;transition:.2s}
 .reading-card[open] summary b{transform:rotate(45deg)}
 .reading-card>p{margin:0!important;padding:0 16px 16px;color:#c9c3d1!important}
+.scores>button{background:rgba(255,255,255,.045);border:1px solid var(--line);border-radius:18px;padding:14px 12px;color:var(--ink);text-align:left;cursor:pointer}
+.scores>button:hover{border-color:rgba(231,190,117,.35);transform:translateY(-1px)}
+.insight-card strong{display:block;margin:5px 0 3px;font-size:13px}
+.forecast-detail{display:grid;gap:12px;margin:18px 0}
+.forecast-detail article{padding:15px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.035)}
+.forecast-detail strong{display:block;color:var(--gold);margin-bottom:5px}
+.sphere-popup h2{margin-bottom:8px}
+.sphere-popup .sphere-score{font:400 44px Prata;color:var(--gold);margin:8px 0 14px}
+.sphere-popup .do-dont{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:18px 0}
+.sphere-popup .do-dont div{padding:13px;border:1px solid var(--line);border-radius:13px;font-size:12px;line-height:1.45}
+.sphere-popup .do-dont strong{display:block;color:var(--gold);margin-bottom:5px}
 .planet-row{display:grid;grid-template-columns:1fr auto auto;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px}
 .planet-row span{color:var(--muted)}
 .planet-row b{color:var(--gold)}
