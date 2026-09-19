@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#090817" />
+  <title>Орбита — персональный проводник</title>
+  <meta name="description" content="Персональный астрологический ассистент: натальная карта, матрица судьбы, совместимость и дневник снов." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Prata&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="sky" aria-hidden="true"></div>
+  <main class="app-shell">
+    <header class="topbar">
+      <button class="avatar" data-action="profile" aria-label="Открыть профиль">В</button>
+      <div class="brand">ОРБИТА <span>✦</span></div>
+      <button class="icon-btn" data-action="notifications" aria-label="Уведомления">
+        <svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>
+      </button>
+    </header>
+
+    <section id="today" class="view active" aria-labelledby="today-title">
+      <div class="date-line" id="current-date"></div>
+      <div class="greeting"><span>Добрый вечер,</span><h1 id="today-title">Алекс</h1></div>
+      <article class="cosmic-card forecast-card">
+        <div class="planet-orbit" aria-hidden="true"><span class="planet"></span><i></i></div>
+        <div class="eyebrow">ГЛАВНАЯ ТЕМА ДНЯ</div>
+        <h2>Ясность приходит<br>через паузу</h2>
+        <p>Сегодня важно не торопиться с выводами. Прислушайся к первому ощущению, но дай себе время проверить его фактами.</p>
+        <button class="text-link" data-modal="forecast">Полный прогноз <span>→</span></button>
+      </article>
+
+      <div class="section-heading"><h3>Твои сферы</h3><span>сегодня</span></div>
+      <div class="scores">
+        <article><span class="score-icon coral">♡</span><strong>Отношения</strong><b>7<small>/10</small></b><i style="--score:70%"></i></article>
+        <article><span class="score-icon gold">◇</span><strong>Работа</strong><b>9<small>/10</small></b><i style="--score:90%"></i></article>
+        <article><span class="score-icon blue">ϟ</span><strong>Энергия</strong><b>8<small>/10</small></b><i style="--score:80%"></i></article>
+      </div>
+      <article class="insight-card">
+        <span class="moon-icon">☾</span><div><div class="eyebrow">СОВЕТ ДНЯ</div><p>Важный разговор лучше провести после 16:00 — формулировки будут точнее.</p></div>
+      </article>
+    </section>
+
+    <section id="charts" class="view" aria-labelledby="charts-title">
+      <div class="page-head"><div class="eyebrow">ПОЗНАЙ СЕБЯ</div><h1 id="charts-title">Твои карты</h1><p>Расчёты по данным рождения с персональной интерпретацией.</p></div>
+      <div class="feature-grid">
+        <button class="feature-card natal" data-flow="natal"><span class="mini-chart">☉</span><div><small>АСТРОЛОГИЯ</small><h2>Натальная карта</h2><p>Планеты, дома, аспекты и твои сильные стороны</p></div><b>→</b></button>
+        <button class="feature-card matrix" data-flow="matrix"><span class="matrix-glyph">22</span><div><small>НУМЕРОЛОГИЯ</small><h2>Матрица судьбы</h2><p>Предназначение, ресурсы и точки роста</p></div><b>→</b></button>
+        <button class="feature-card couple" data-flow="couple"><span>∞</span><div><small>ДЛЯ ДВОИХ</small><h2>Совместимость</h2><p>Динамика пары, чувства, быт и финансы</p></div><b>→</b></button>
+      </div>
+    </section>
+
+    <section id="dreams" class="view" aria-labelledby="dreams-title">
+      <div class="page-head"><div class="eyebrow">ДНЕВНИК СНОВ</div><h1 id="dreams-title">Что тебе снилось?</h1><p>Опиши сон — ассистент найдёт символы, эмоции и возможные смыслы.</p></div>
+      <form id="dream-form" class="dream-entry">
+        <textarea id="dream-text" placeholder="Я оказался у моря, вода была очень тёмной…" required></textarea>
+        <div class="form-row"><button type="button" class="voice-btn" aria-label="Записать голосом">◉</button><button type="submit" class="primary-btn">Разобрать сон <span>✦</span></button></div>
+      </form>
+      <div class="section-heading"><h3>Последние сны</h3><span id="dream-count">2 записи</span></div>
+      <div id="dream-list" class="dream-list">
+        <button class="dream-item"><span>🌊</span><div><small>14 сентября</small><strong>Тёмная вода и старый дом</strong><p>Переход · тревога · прошлое</p></div><b>→</b></button>
+        <button class="dream-item"><span>🌲</span><div><small>5 августа</small><strong>Дорога через лес</strong><p>Поиск · направление · выбор</p></div><b>→</b></button>
+      </div>
+    </section>
+
+    <section id="assistant" class="view chat-view" aria-labelledby="assistant-title">
+      <div class="assistant-head"><span class="orb">✦</span><div><div class="eyebrow">ПЕРСОНАЛЬНЫЙ АССИСТЕНТ</div><h1 id="assistant-title">Спроси Орбиту</h1></div></div>
+      <div id="chat" class="chat">
+        <div class="message bot">Я знаю контекст твоей карты, матрицы и дневника снов. О чём хочешь поговорить?</div>
+        <div class="suggestions">
+          <button>Какая тема у этой недели?</button><button>Хороший ли завтра день для встречи?</button><button>Почему мне часто снится вода?</button>
+        </div>
+      </div>
+      <form id="chat-form" class="chat-form"><input id="chat-input" placeholder="Напиши свой вопрос…" autocomplete="off"/><button aria-label="Отправить">↑</button></form>
+    </section>
+
+    <section id="profile" class="view" aria-labelledby="profile-title">
+      <div class="page-head"><div class="eyebrow">ЛИЧНЫЕ ДАННЫЕ</div><h1 id="profile-title">Профиль рождения</h1><p>Они нужны для персональных расчётов и прогноза.</p></div>
+      <form id="profile-form" class="profile-form">
+        <label>Имя<input name="name" value="Алекс" required></label>
+        <label>Дата рождения<input name="birthdate" type="date" value="1990-01-01" required></label>
+        <div class="split"><label>Время<input name="birthtime" type="time" value="12:00" required></label><label>Часовой пояс<select name="timezone"><option>UTC+1</option><option>UTC+3</option><option>UTC+5</option></select></label></div>
+        <label>Место рождения<input name="birthplace" value="Париж, Франция" required></label>
+        <label class="toggle-row"><span><strong>Ежедневный прогноз</strong><small>Получать в Telegram каждое утро</small></span><input type="checkbox" checked><i></i></label>
+        <button class="primary-btn" type="submit">Сохранить профиль</button>
+      </form>
+    </section>
+
+    <nav class="bottom-nav" aria-label="Основная навигация">
+      <button class="active" data-view="today"><span>☼</span><small>Сегодня</small></button>
+      <button data-view="charts"><span>◇</span><small>Карты</small></button>
+      <button data-view="dreams"><span>☾</span><small>Сны</small></button>
+      <button data-view="assistant"><span>✦</span><small>Ассистент</small></button>
+    </nav>
+  </main>
+
+  <dialog id="modal">
+    <div class="modal-handle"></div><button class="modal-close" aria-label="Закрыть">×</button><div id="modal-content"></div>
+  </dialog>
+  <div id="toast" role="status"></div>
+  <script src="./app.js"></script>
+</body>
+</html>
