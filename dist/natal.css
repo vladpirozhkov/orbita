@@ -22,6 +22,22 @@
 .transit-list small{color:var(--muted);white-space:nowrap}
 .positions{margin:18px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:14px 0}
 .positions summary{cursor:pointer;color:var(--gold);font-weight:700}
+.loading-card{text-align:center;padding:45px 12px}
+.loading-card span{display:grid;place-items:center;width:74px;height:74px;margin:auto;border-radius:50%;background:radial-gradient(circle,#f5dcaa,#a76e57);color:#24172e;font-size:25px}
+.loading-card h2{font:400 25px Prata;margin:20px 0 8px}
+.loading-card p{color:var(--muted)}
+.reading-intro{margin:22px 0}
+.reading-intro h3{font:400 22px/1.4 Prata;margin:0 0 10px}
+.reading-cards{display:grid;gap:10px;margin:18px 0 24px}
+.reading-card{border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.035);overflow:hidden}
+.reading-card summary{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px;cursor:pointer;list-style:none}
+.reading-card summary::-webkit-details-marker{display:none}
+.reading-card summary span{display:grid;gap:5px}
+.reading-card summary small{color:var(--gold);font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.reading-card summary strong{font-size:13px;line-height:1.4}
+.reading-card summary b{color:var(--gold);font-size:20px;transition:.2s}
+.reading-card[open] summary b{transform:rotate(45deg)}
+.reading-card>p{margin:0!important;padding:0 16px 16px;color:#c9c3d1!important}
 .planet-row{display:grid;grid-template-columns:1fr auto auto;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px}
 .planet-row span{color:var(--muted)}
 .planet-row b{color:var(--gold)}
