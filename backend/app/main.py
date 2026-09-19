@@ -6,6 +6,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 import os
 from datetime import datetime
 from functools import lru_cache
+from zoneinfo import ZoneInfo
 
 import httpx
 from fastapi import FastAPI, HTTPException
@@ -13,7 +14,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from timezonefinder import TimezoneFinder
 
-from .astrology import calculate_natal_chart
+from .astrology import calculate_daily_forecast, calculate_natal_chart, interpret_natal_chart
 
 app = FastAPI(
     title="Orbita API",
@@ -101,12 +102,15 @@ async def search_places(q: str) -> list[dict]:
 @app.post("/v1/natal-chart")
 def natal_chart(request: NatalChartRequest) -> dict:
     try:
-        return calculate_natal_chart(
+        chart = calculate_natal_chart(
             birth_datetime=request.birth_datetime,
             timezone_name=request.timezone,
             latitude=request.latitude,
             longitude=request.longitude,
             house_system=request.house_system,
         )
+        chart["interpretation"] = interpret_natal_chart(chart)
+        chart["daily_forecast"] = calculate_daily_forecast(chart, datetime.now(ZoneInfo(request.timezone)))
+        return chart
     except (ValueError, KeyError) as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
