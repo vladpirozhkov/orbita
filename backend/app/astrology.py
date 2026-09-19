@@ -56,6 +56,14 @@ SIGN_TEXT = {
 
 SIGN_RU = dict(zip(SIGNS, ("Овен", "Телец", "Близнецы", "Рак", "Лев", "Дева", "Весы", "Скорпион", "Стрелец", "Козерог", "Водолей", "Рыбы")))
 PLANET_RU = {"Sun": "Солнце", "Moon": "Луна", "Mercury": "Меркурий", "Venus": "Венера", "Mars": "Марс", "Jupiter": "Юпитер", "Saturn": "Сатурн", "Uranus": "Уран", "Neptune": "Нептун", "Pluto": "Плутон", "True Node": "Северный узел"}
+HOUSE_TEXT = {
+    1: "самопрезентация, тело и личная инициатива", 2: "ценности, деньги и чувство опоры",
+    3: "общение, обучение и близкое окружение", 4: "дом, семья и внутреннее чувство безопасности",
+    5: "творчество, романтика и удовольствие", 6: "повседневность, навыки и забота о себе",
+    7: "партнёрство, договорённости и отражение себя в другом", 8: "доверие, близость и глубокие перемены",
+    9: "мировоззрение, путешествия и поиск смысла", 10: "карьера, статус и долгосрочные цели",
+    11: "друзья, сообщества и образ будущего", 12: "уединение, бессознательное и восстановление",
+}
 
 ASPECT_TONE = {
     "conjunction": (0, "усиливает"),
@@ -195,6 +203,48 @@ def interpret_natal_chart(chart: dict) -> dict:
     asc_strength, _ = SIGN_TEXT[asc_sign]
     tense = [row for row in chart["aspects"] if row["type"] in {"square", "opposition"}][:3]
     supportive = [row for row in chart["aspects"] if row["type"] in {"trine", "sextile"}][:3]
+    mercury = chart["planets"]["Mercury"]
+    venus = chart["planets"]["Venus"]
+    mars = chart["planets"]["Mars"]
+    jupiter = chart["planets"]["Jupiter"]
+    saturn = chart["planets"]["Saturn"]
+    cards = [
+        {
+            "key": "identity", "title": "Характер и самоощущение",
+            "summary": f"Солнце в знаке {SIGN_RU[sun['sign']]} · {sun['house']} дом",
+            "body": f"Ваш основной способ проявлять себя — {sun_strength}. Сфера, где это особенно заметно: {HOUSE_TEXT[sun['house']]}. Важно не {sun_risk}.",
+        },
+        {
+            "key": "emotions", "title": "Эмоции и чувство безопасности",
+            "summary": f"Луна в знаке {SIGN_RU[moon['sign']]} · {moon['house']} дом",
+            "body": f"Для эмоционального равновесия нужны качества: {moon_strength}. Чувства особенно включаются через темы «{HOUSE_TEXT[moon['house']]}». Риск — {moon_risk}.",
+        },
+        {
+            "key": "communication", "title": "Мышление и общение",
+            "summary": f"Меркурий в знаке {SIGN_RU[mercury['sign']]} · {mercury['house']} дом",
+            "body": f"Интеллектуальный стиль опирается на такие качества, как {SIGN_TEXT[mercury['sign']][0]}. Лучше всего мышление раскрывается через {HOUSE_TEXT[mercury['house']]}.",
+        },
+        {
+            "key": "relationships", "title": "Любовь и отношения",
+            "summary": f"Венера в знаке {SIGN_RU[venus['sign']]} · {venus['house']} дом",
+            "body": f"В близости особенно ценятся {SIGN_TEXT[venus['sign']][0]}. Любовь и симпатия проявляются через сферу «{HOUSE_TEXT[venus['house']]}»; важно не {SIGN_TEXT[venus['sign']][1]}.",
+        },
+        {
+            "key": "action", "title": "Воля, энергия и конфликты",
+            "summary": f"Марс в знаке {SIGN_RU[mars['sign']]} · {mars['house']} дом",
+            "body": f"Способ добиваться своего связан с качествами: {SIGN_TEXT[mars['sign']][0]}. Главная зона приложения энергии — {HOUSE_TEXT[mars['house']]}. Под давлением возможна тенденция {SIGN_TEXT[mars['sign']][1]}.",
+        },
+        {
+            "key": "career", "title": "Развитие и карьера",
+            "summary": f"Юпитер — {jupiter['house']} дом · Сатурн — {saturn['house']} дом",
+            "body": f"Рост приходит через сферу «{HOUSE_TEXT[jupiter['house']]}», а устойчивый результат требует дисциплины в теме «{HOUSE_TEXT[saturn['house']]}». Сочетание этих зон показывает, где потенциал превращается в долгосрочную компетенцию.",
+        },
+        {
+            "key": "growth", "title": "Ресурсы и зоны роста",
+            "summary": f"{len(supportive)} поддерживающих и {len(tense)} напряжённых ключевых аспекта",
+            "body": f"Гармоничные аспекты показывают навыки, которые включаются естественно. Напряжённые — не недостатки, а повторяющиеся задачи выбора. Главный ориентир: не {sun_risk}; в эмоциональных решениях — не {moon_risk}.",
+        },
+    ]
     return {
         "headline": f"{sun_strength.capitalize()} — ядро карты; {asc_strength} заметны во внешнем стиле.",
         "identity": (
@@ -209,6 +259,7 @@ def interpret_natal_chart(chart: dict) -> dict:
         "growth": f"Зоны роста карты: не {sun_risk}; в эмоциональных решениях — не {moon_risk}.",
         "supportive_aspects": supportive,
         "tense_aspects": tense,
+        "cards": cards,
         "method": "Rule-based interpretation of Swiss Ephemeris positions",
     }
 
