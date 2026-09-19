@@ -66,11 +66,23 @@ HOUSE_TEXT = {
 }
 
 ASPECT_TONE = {
-    "conjunction": (0, "усиливает"),
-    "sextile": (1, "открывает возможность для"),
-    "trine": (1, "поддерживает"),
-    "square": (-1, "создаёт напряжение в теме"),
-    "opposition": (-1, "просит найти баланс в теме"),
+    "conjunction": (0, "соединение"),
+    "sextile": (1, "секстиль"),
+    "trine": (1, "тригон"),
+    "square": (-1, "квадрат"),
+    "opposition": (-1, "оппозиция"),
+}
+
+TRANSIT_THEME = {
+    "Sun": "уверенность, воля и проявление себя", "Moon": "эмоции, настроение и автоматические реакции",
+    "Mercury": "мышление, разговоры и документы", "Venus": "симпатия, отношения и личные ценности",
+    "Mars": "энергия, напор и способ действовать",
+}
+NATAL_THEME = {
+    "Sun": "самооценка и жизненные цели", "Moon": "эмоциональная безопасность", "Mercury": "мышление и коммуникация",
+    "Venus": "близость и ценности", "Mars": "воля и границы", "Jupiter": "рост и возможности",
+    "Saturn": "ответственность и ограничения", "Uranus": "свобода и перемены", "Neptune": "интуиция и идеалы",
+    "Pluto": "контроль и глубокая трансформация", "True Node": "долгосрочное направление развития",
 }
 
 
@@ -283,14 +295,14 @@ def calculate_daily_forecast(chart: dict, forecast_date: datetime) -> dict:
             for aspect_name, (exact, _) in ASPECTS.items():
                 orb = abs(separation - exact)
                 if orb <= 2.5:
-                    tone, verb = ASPECT_TONE[aspect_name]
+                    tone, aspect_label = ASPECT_TONE[aspect_name]
                     hits.append({
                         "transit": transit_name,
                         "natal": natal_name,
                         "type": aspect_name,
                         "orb": round(orb, 2),
                         "tone": tone,
-                        "text": f"{PLANET_RU[transit_name]} {verb} натальную тему «{PLANET_RU[natal_name]}»",
+                        "text": f"{PLANET_RU[transit_name]} — {PLANET_RU[natal_name]}: {aspect_label}",
                     })
                     break
     hits.sort(key=lambda row: row["orb"])
@@ -320,11 +332,69 @@ def calculate_daily_forecast(chart: dict, forecast_date: datetime) -> dict:
     else:
         headline = "Спокойный транзитный фон"
         summary = "Точных сильных аспектов к натальной карте сегодня немного. Это хороший день для привычных задач и восстановления ресурса."
+    def sphere_copy(key: str, score: int) -> dict:
+        copy = {
+            "relationships": {
+                "high": ("Легче услышать друг друга и прямо выразить симпатию.", "знакомства, тёплый разговор, совместные решения", "идеализировать обещания и торопить сближение"),
+                "mid": ("Эмоциональный фон зависит от качества общения больше, чем от обстоятельств.", "спокойно уточнять ожидания и замечать реальные действия", "додумывать мотивы другого человека"),
+                "low": ("Чувствительность повышена: нейтральные слова могут восприниматься острее обычного.", "обозначать чувства без обвинений и брать паузу", "ультиматумы, проверки и решения на пике эмоций"),
+            },
+            "work": {
+                "high": ("Проще концентрироваться, договариваться и продвигать конкретный результат.", "важная задача, переговоры, планирование и завершение", "брать на себя больше, чем реально выполнить"),
+                "mid": ("День подходит для последовательной работы без резких рывков.", "рутинные задачи, проверка деталей и наведение порядка", "многозадачность и постоянное переключение"),
+                "low": ("Вероятны задержки, спорные формулировки или повышенная требовательность к себе.", "перепроверять документы и оставлять запас времени", "конфликтовать с руководством и обещать быстрый результат"),
+            },
+            "energy": {
+                "high": ("Физический и волевой ресурс выше обычного — легче перейти от мысли к действию.", "спорт, активные дела и задачи, требующие инициативы", "перегружаться и игнорировать сигналы усталости"),
+                "mid": ("Ресурс ровный, если не расходовать его на лишнюю спешку.", "умеренная нагрузка и привычный режим", "компенсировать усталость стимуляторами и поздней активностью"),
+                "low": ("Энергия может идти волнами; восстановление сегодня продуктивнее форсирования.", "сон, прогулка, короткие задачи и снижение темпа", "интенсивные нагрузки и борьба с усталостью через силу"),
+            },
+        }
+        level = "high" if score >= 8 else "low" if score <= 4 else "mid"
+        summary, favorable, avoid = copy[key][level]
+        return {"score": score, "level": level, "summary": summary, "favorable": favorable, "avoid": avoid}
+
+    spheres = {key: sphere_copy(key, score) for key, score in scores.items()}
+    top = selected[0] if selected else None
+    if top:
+        aspect_effect = {
+            "conjunction": "Темы двух планет усиливают друг друга и становятся заметнее.",
+            "sextile": "Возникает возможность, которую важно поддержать собственным действием.",
+            "trine": "Обстоятельства складываются мягче, привычные способности доступны легче.",
+            "square": "Возникает внутреннее или внешнее напряжение, требующее осознанной корректировки.",
+            "opposition": "Две потребности тянут в разные стороны, поэтому важно найти рабочий баланс.",
+        }[top["type"]]
+        practical = "Используйте паузу перед важной реакцией и выбирайте конкретный следующий шаг." if top["tone"] < 0 else "Зафиксируйте возможность конкретным действием, пока поддерживающий аспект точен."
+        key_transit = {
+            "title": top["text"],
+            "explanation": f"Сегодня связаны темы «{TRANSIT_THEME[top['transit']]}» и «{NATAL_THEME[top['natal']]}». {aspect_effect}",
+            "advice": practical,
+            "orb": top["orb"],
+        }
+    else:
+        key_transit = {
+            "title": "Точных сильных транзитов сегодня немного",
+            "explanation": "Фон дня не требует резких изменений и позволяет опираться на привычный ритм.",
+            "advice": "Сосредоточьтесь на восстановлении и завершении уже начатого.",
+            "orb": None,
+        }
+
+    best_key = max(scores, key=scores.get)
+    weak_key = min(scores, key=scores.get)
+    sphere_names = {"relationships": "отношений", "work": "работы", "energy": "энергии"}
+    overview = {
+        "what_to_expect": summary,
+        "favorable": f"Лучше всего поддержана сфера {sphere_names[best_key]}: {spheres[best_key]['favorable']}.",
+        "avoid": f"Больше внимания требует сфера {sphere_names[weak_key]}. Лучше избегать: {spheres[weak_key]['avoid']}.",
+    }
     return {
         "date": local_date.isoformat(),
         "headline": headline,
         "summary": summary,
         "scores": scores,
+        "spheres": spheres,
+        "overview": overview,
+        "key_transit": key_transit,
         "transits": selected,
         "method": "Swiss Ephemeris transits at 12:00 UTC, 2.5° orb",
     }
