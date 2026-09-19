@@ -29,20 +29,20 @@
       <div class="greeting"><span>Добрый вечер,</span><h1 id="today-title">Алекс</h1></div>
       <article class="cosmic-card forecast-card">
         <div class="planet-orbit" aria-hidden="true"><span class="planet"></span><i></i></div>
-        <div class="eyebrow">ГЛАВНАЯ ТЕМА ДНЯ</div>
-        <h2>Ясность приходит<br>через паузу</h2>
-        <p>Сегодня важно не торопиться с выводами. Прислушайся к первому ощущению, но дай себе время проверить его фактами.</p>
+        <div class="eyebrow">ПЕРСОНАЛЬНЫЙ ПРОГНОЗ · <span id="forecast-date">СЕГОДНЯ</span></div>
+        <h2 id="forecast-headline">Добавь данные рождения</h2>
+        <p id="forecast-summary">Заполни профиль — Орбита рассчитает транзиты к твоей натальной карте.</p>
         <button class="text-link" data-modal="forecast">Полный прогноз <span>→</span></button>
       </article>
 
       <div class="section-heading"><h3>Твои сферы</h3><span>сегодня</span></div>
       <div class="scores">
-        <article><span class="score-icon coral">♡</span><strong>Отношения</strong><b>7<small>/10</small></b><i style="--score:70%"></i></article>
-        <article><span class="score-icon gold">◇</span><strong>Работа</strong><b>9<small>/10</small></b><i style="--score:90%"></i></article>
-        <article><span class="score-icon blue">ϟ</span><strong>Энергия</strong><b>8<small>/10</small></b><i style="--score:80%"></i></article>
+        <article><span class="score-icon coral">♡</span><strong>Отношения</strong><b><span id="score-relationships">—</span><small>/10</small></b><i id="bar-relationships" style="--score:0%"></i></article>
+        <article><span class="score-icon gold">◇</span><strong>Работа</strong><b><span id="score-work">—</span><small>/10</small></b><i id="bar-work" style="--score:0%"></i></article>
+        <article><span class="score-icon blue">ϟ</span><strong>Энергия</strong><b><span id="score-energy">—</span><small>/10</small></b><i id="bar-energy" style="--score:0%"></i></article>
       </div>
       <article class="insight-card">
-        <span class="moon-icon">☾</span><div><div class="eyebrow">СОВЕТ ДНЯ</div><p>Важный разговор лучше провести после 16:00 — формулировки будут точнее.</p></div>
+        <span class="moon-icon">☾</span><div><div class="eyebrow">КЛЮЧЕВОЙ ТРАНЗИТ</div><p id="forecast-advice">После заполнения профиля здесь появится главный акцент дня.</p></div>
       </article>
     </section>
 
@@ -84,8 +84,11 @@
       <form id="profile-form" class="profile-form">
         <label>Имя<input name="name" value="Алекс" required></label>
         <label>Дата рождения<input name="birthdate" type="date" value="1990-01-01" required></label>
-        <div class="split"><label>Время<input name="birthtime" type="time" value="12:00" required></label><label>Часовой пояс<select name="timezone"><option>UTC+1</option><option>UTC+3</option><option>UTC+5</option></select></label></div>
-        <label>Место рождения<input name="birthplace" value="Париж, Франция" required></label>
+        <label>Точное время рождения<input name="birthtime" type="time" value="12:00" required></label>
+        <label>Место рождения<input id="profile-place-query" name="birthplace" autocomplete="off" placeholder="Начните вводить город" required></label>
+        <div class="place-results" id="profile-place-results"></div>
+        <input name="latitude" type="hidden"><input name="longitude" type="hidden"><input name="timezone" type="hidden">
+        <div class="form-state" id="profile-place-state">Выберите город из списка — часовой пояс определится автоматически.</div>
         <label class="toggle-row"><span><strong>Ежедневный прогноз</strong><small>Получать в Telegram каждое утро</small></span><input type="checkbox" checked><i></i></label>
         <button class="primary-btn" type="submit">Сохранить профиль</button>
       </form>
