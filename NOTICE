@@ -1,0 +1,10 @@
+Orbita
+Copyright (C) 2026 Orbita contributors
+
+This project uses Swiss Ephemeris through the pyswisseph Python extension.
+Swiss Ephemeris is copyright Astrodienst AG and its contributors and is used
+under the GNU Affero General Public License, version 3 or later.
+
+The names of Swiss Ephemeris authors and copyright holders may not be used to
+promote derived products without their written permission.
+
