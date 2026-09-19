@@ -15,6 +15,7 @@ def test_demo_chart_is_deterministic():
 
     assert first == second
     assert first["planets"]["Sun"]["sign"] == "Capricorn"
+    assert 1 <= first["planets"]["Sun"]["house"] <= 12
     assert len(first["houses"]) == 12
     assert 0 <= first["angles"]["ascendant"] < 360
     assert first["engine"]["name"] == "Swiss Ephemeris"
@@ -28,3 +29,4 @@ def test_all_planet_longitudes_are_normalized():
         -74.0060,
     )
     assert all(0 <= row["longitude"] < 360 for row in chart["planets"].values())
+    assert all(1 <= row["house"] <= 12 for row in chart["planets"].values())
