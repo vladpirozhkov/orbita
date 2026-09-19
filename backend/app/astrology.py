@@ -76,6 +76,15 @@ def _angular_distance(a: float, b: float) -> float:
     return min(distance, 360 - distance)
 
 
+def _house_for(longitude: float, cusps: tuple[float, ...]) -> int:
+    normalized = longitude % 360
+    for index, start in enumerate(cusps):
+        end = cusps[(index + 1) % 12]
+        if (normalized - start) % 360 < (end - start) % 360:
+            return index + 1
+    return 12
+
+
 def calculate_natal_chart(
     birth_datetime: datetime,
     timezone_name: str,
@@ -135,7 +144,10 @@ def calculate_natal_chart(
             "house_system": house_system,
         },
         "julian_day_ut": round(jd_ut, 8),
-        "planets": {name: asdict(value) for name, value in positions.items()},
+        "planets": {
+            name: {**asdict(value), "house": _house_for(value.longitude, cusps)}
+            for name, value in positions.items()
+        },
         "houses": houses,
         "angles": {
             "ascendant": round(angles[0] % 360, 6),
@@ -145,4 +157,3 @@ def calculate_natal_chart(
         },
         "aspects": sorted(aspect_rows, key=lambda row: row["orb"]),
     }
-
