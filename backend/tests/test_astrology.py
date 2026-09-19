@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from app.astrology import calculate_natal_chart
+from app.astrology import calculate_daily_forecast, calculate_natal_chart, interpret_natal_chart
 
 
 def test_demo_chart_is_deterministic():
@@ -30,3 +30,19 @@ def test_all_planet_longitudes_are_normalized():
     )
     assert all(0 <= row["longitude"] < 360 for row in chart["planets"].values())
     assert all(1 <= row["house"] <= 12 for row in chart["planets"].values())
+
+
+def test_interpretation_and_daily_forecast_are_grounded_in_chart():
+    chart = calculate_natal_chart(
+        datetime(1990, 1, 1, 12, 0),
+        "Europe/Paris",
+        48.8566,
+        2.3522,
+    )
+    interpretation = interpret_natal_chart(chart)
+    forecast = calculate_daily_forecast(chart, datetime(2026, 9, 20, 12, 0))
+
+    assert "Солнце" in interpretation["identity"]
+    assert forecast["date"] == "2026-09-20"
+    assert all(1 <= value <= 10 for value in forecast["scores"].values())
+    assert all(row["orb"] <= 2.5 for row in forecast["transits"])
