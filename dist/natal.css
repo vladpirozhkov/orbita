@@ -2,10 +2,10 @@
 .natal-form label{display:grid;gap:7px;color:var(--muted);font-size:12px}
 .natal-form input{width:100%;border:1px solid var(--line);background:rgba(255,255,255,.045);color:var(--ink);border-radius:13px;padding:14px;outline:none}
 .place-wrap{position:relative}
-.place-results{display:none;position:absolute;z-index:4;top:100%;left:0;right:0;background:#211d39;border:1px solid var(--line);border-radius:12px;overflow:hidden;max-height:210px;overflow-y:auto}
-.place-results.show{display:block}
+.place-results{display:none;background:#211d39;border:1px solid var(--line);border-radius:12px;overflow:hidden;max-height:210px;overflow-y:auto}
+.place-results:not(:empty){display:block}
 .place-results button{display:block;width:100%;border:0;border-bottom:1px solid var(--line);background:none;color:var(--ink);text-align:left;padding:11px;font-size:12px}
-.calc-state{min-height:18px;color:var(--muted);font-size:12px}
+.calc-state,.form-state{min-height:18px;color:var(--muted);font-size:12px}
 .planet-list{display:grid;gap:8px;margin:18px 0}
 .planet-row{display:grid;grid-template-columns:1fr auto auto;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px}
 .planet-row span{color:var(--muted)}
