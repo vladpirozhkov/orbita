@@ -48,3 +48,7 @@ def test_interpretation_and_daily_forecast_are_grounded_in_chart():
     assert forecast["date"] == "2026-09-20"
     assert all(1 <= value <= 10 for value in forecast["scores"].values())
     assert all(row["orb"] <= 2.5 for row in forecast["transits"])
+    assert set(forecast["spheres"]) == {"relationships", "work", "energy"}
+    assert forecast["overview"]["favorable"]
+    assert forecast["overview"]["avoid"]
+    assert forecast["key_transit"]["explanation"]
