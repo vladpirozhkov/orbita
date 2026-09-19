@@ -24,10 +24,10 @@ uvicorn backend.app.main:app --reload
 
 ```json
 {
-  "birth_datetime": "1996-02-10T23:50:00",
-  "timezone": "Asia/Yekaterinburg",
-  "latitude": 58.0105,
-  "longitude": 56.2502,
+  "birth_datetime": "1990-01-01T12:00:00",
+  "timezone": "Europe/Paris",
+  "latitude": 48.8566,
+  "longitude": 2.3522,
   "house_system": "P"
 }
 ```
@@ -44,4 +44,3 @@ PYTHONPATH=backend pytest backend/tests
 `pyswisseph`, которое включает Swiss Ephemeris и также распространяется под
 AGPL-3.0. Секреты, ключи доступа и пользовательские данные не входят в исходный
 код и никогда не должны коммититься.
-
