@@ -60,14 +60,13 @@
     <section id="dreams" class="view" aria-labelledby="dreams-title">
       <div class="page-head"><div class="eyebrow">ДНЕВНИК СНОВ</div><h1 id="dreams-title">Что тебе снилось?</h1><p>Опиши сон — Орбита поможет найти символы, эмоции и возможные смыслы.</p></div>
       <form id="dream-form" class="dream-entry">
+        <div class="dream-date-field"><label for="dream-date">Дата сна</label><input id="dream-date" type="date" required></div>
         <textarea id="dream-text" placeholder="Я оказался у моря, вода была очень тёмной…" required></textarea>
-        <div class="form-row"><button type="button" class="voice-btn" aria-label="Записать голосом">◉</button><button type="submit" class="primary-btn">Разобрать сон <span>✦</span></button></div>
+        <div class="form-row"><button type="submit" class="primary-btn">Сохранить сон</button></div>
+        <p class="dream-privacy">Запись хранится только на этом устройстве.</p>
       </form>
-      <div class="section-heading"><h3>Последние сны</h3><span id="dream-count">2 записи</span></div>
-      <div id="dream-list" class="dream-list">
-        <button class="dream-item"><span>🌊</span><div><small>14 сентября</small><strong>Тёмная вода и старый дом</strong><p>Переход · тревога · прошлое</p></div><b>→</b></button>
-        <button class="dream-item"><span>🌲</span><div><small>5 августа</small><strong>Дорога через лес</strong><p>Поиск · направление · выбор</p></div><b>→</b></button>
-      </div>
+      <div class="section-heading"><h3>Последние сны</h3><span id="dream-count">0 записей</span></div>
+      <div id="dream-list" class="dream-list"></div>
     </section>
 
     <section id="profile" class="view" aria-labelledby="profile-title">
