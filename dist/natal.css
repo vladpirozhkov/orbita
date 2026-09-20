@@ -528,5 +528,11 @@ html[data-theme="dark"] .modal-close{
 .dream-empty p{margin:0;font-size:13px}
 .dream-item{cursor:pointer}
 .dream-detail .dream-full-text{margin:18px 0 0!important;white-space:pre-wrap;color:var(--ink)}
+.dream-detail{touch-action:pan-y;outline:none}
+.dream-pagination{display:grid;grid-template-columns:46px 1fr 46px;align-items:center;gap:12px;margin-top:24px;padding-top:16px;border-top:1px solid var(--line)}
+.dream-pagination button{width:46px;height:46px;border:1px solid rgba(105,109,92,.2);border-radius:50%;background:rgba(255,255,255,.4);color:var(--ink);font-size:21px;cursor:pointer;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.dream-pagination button:disabled{opacity:.28;cursor:default}
+.dream-pagination span{text-align:center;color:var(--muted);font-size:13px;font-weight:700}
 html[data-theme="dark"] .dream-date-field input,html[data-theme="dark"] .dream-entry textarea{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.1);color:var(--ink)}
+html[data-theme="dark"] .dream-pagination button{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12)}
 @media(max-width:370px){.greeting span,.greeting h1{font-size:20px!important}.bottom-nav button small{font-size:11px}.bottom-nav .nav-icon{width:23px;height:23px}}
