@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#f5f2ec" />
+  <meta name="theme-color" content="#D8E9F3" />
   <title>Орбита — персональный проводник</title>
   <meta name="description" content="Персональный астрологический ассистент: натальная карта, матрица судьбы, совместимость и дневник снов." />
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='27' fill='%23090817' stroke='%23e7be75' stroke-width='3'/%3E%3Cpath d='M17 38c12 7 25 4 34-8' fill='none' stroke='%23e7be75' stroke-width='3' stroke-linecap='round'/%3E%3Ccircle cx='38' cy='22' r='7' fill='%23e7be75'/%3E%3C/svg%3E" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='27' fill='%23D8E9F3' stroke='%234390BC' stroke-width='3'/%3E%3Cpath d='M17 38c12 7 25 4 34-8' fill='none' stroke='%234390BC' stroke-width='3' stroke-linecap='round'/%3E%3Ccircle cx='38' cy='22' r='7' fill='%238DBDD8'/%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -26,7 +26,7 @@
 
     <section id="today" class="view active" aria-labelledby="today-title">
       <div class="date-line" id="current-date"></div>
-      <div class="greeting"><span>Добрый вечер,</span><h1 id="today-title">Алекс</h1></div>
+      <div class="greeting"><span>Добрый вечер,</span><h1 id="today-title">друг</h1></div>
       <article class="cosmic-card forecast-card">
         <div class="planet-orbit" aria-hidden="true"><span class="planet"></span><i></i></div>
         <div class="eyebrow">ПЕРСОНАЛЬНЫЙ ПРОГНОЗ · <span id="forecast-date">СЕГОДНЯ</span></div>
@@ -50,9 +50,10 @@
       <button class="view-back" data-back type="button">← <span>Назад</span></button>
       <div class="page-head"><div class="eyebrow">ПОЗНАЙ СЕБЯ</div><h1 id="charts-title">Твои карты</h1><p>Расчёты по данным рождения с персональной интерпретацией.</p></div>
       <div class="feature-grid">
-        <button class="feature-card natal" data-flow="natal"><span class="mini-chart">☉</span><div><small>АСТРОЛОГИЯ</small><h2>Натальная карта</h2><p>Планеты, дома, аспекты и твои сильные стороны</p></div><b>→</b></button>
-        <button class="feature-card matrix" data-flow="matrix"><span class="matrix-glyph">22</span><div><small>НУМЕРОЛОГИЯ</small><h2>Матрица судьбы</h2><p>Предназначение, ресурсы и точки роста</p></div><b>→</b></button>
-        <button class="feature-card couple" data-flow="couple"><span>∞</span><div><small>ДЛЯ ДВОИХ</small><h2>Совместимость</h2><p>Динамика пары, чувства, быт и финансы</p></div><b>→</b></button>
+        <button class="feature-card natal" data-flow="natal"><span class="mini-chart">☉</span><div><small>ТВОИ ДАННЫЕ РОЖДЕНИЯ</small><h2>Моя натальная карта</h2><p>Персональная карта и подробная интерпретация</p></div><b>→</b></button>
+        <button class="feature-card partner" data-flow="partner"><span>◎</span><div><small>НОВЫЙ РАСЧЁТ</small><h2>Натальная карта партнёра</h2><p>Сохрани данные партнёра и рассчитай его карту</p></div><b>→</b></button>
+        <button class="feature-card matrix" data-flow="matrix"><span class="matrix-glyph">22</span><div><small>ПО ДАТЕ РОЖДЕНИЯ</small><h2>Матрица судьбы</h2><p>Характер, ресурсы, отношения, деньги и задачи</p></div><b>→</b></button>
+        <button class="feature-card couple" data-flow="couple"><span>∞</span><div><small>ВЫ И ПАРТНЁР</small><h2>Совместимость</h2><p>Любовь, секс, быт, дружба, деньги, дети и другое</p></div><b>→</b></button>
       </div>
     </section>
 
@@ -86,9 +87,9 @@
       <button class="view-back" data-back type="button">← <span>Назад</span></button>
       <div class="page-head"><div class="eyebrow">ЛИЧНЫЕ ДАННЫЕ</div><h1 id="profile-title">Профиль рождения</h1><p>Они нужны для персональных расчётов и прогноза.</p></div>
       <form id="profile-form" class="profile-form">
-        <label>Имя<input name="name" value="Алекс" required></label>
-        <label>Дата рождения<input name="birthdate" type="date" value="1990-01-01" required></label>
-        <label>Точное время рождения<input name="birthtime" type="time" value="12:00" required></label>
+        <label>Имя<input name="name" placeholder="Как к вам обращаться" required></label>
+        <label>Дата рождения<input name="birthdate" type="date" required></label>
+        <label>Точное время рождения<input name="birthtime" type="time" required></label>
         <label>Место рождения<input id="profile-place-query" name="birthplace" autocomplete="off" placeholder="Начните вводить город" required></label>
         <div class="place-results" id="profile-place-results"></div>
         <input name="latitude" type="hidden"><input name="longitude" type="hidden"><input name="timezone" type="hidden">
