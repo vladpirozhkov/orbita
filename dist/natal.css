@@ -49,6 +49,34 @@
 .sphere-popup .do-dont{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:18px 0}
 .sphere-popup .do-dont div{padding:13px;border:1px solid var(--line);border-radius:13px;font-size:12px;line-height:1.45}
 .sphere-popup .do-dont strong{display:block;color:var(--gold);margin-bottom:5px}
+
+/* Quieter, product-oriented visual language */
+.sky{opacity:.12}
+body{background:radial-gradient(circle at 50% -20%,#211d3a 0,transparent 38%),#0d0c16}
+.cosmic-card,.feature-card{background:#181625;box-shadow:none;border-color:rgba(255,255,255,.075)}
+.forecast-card{min-height:0;padding:30px 28px}
+.forecast-card h2{font-family:Manrope,system-ui,sans-serif;font-weight:600;font-size:28px}
+.planet-orbit{display:none}
+.primary-btn{background:#dfb66e;border-radius:12px}
+.feature-card{border-radius:16px}
+.feature-card>span{border-radius:14px;box-shadow:none;background:rgba(231,190,117,.06)}
+.bottom-nav{background:rgba(18,17,28,.94);border-radius:18px;box-shadow:0 12px 35px rgba(0,0,0,.24)}
+dialog{background:#171522;border-radius:20px;padding:30px;box-shadow:0 24px 70px rgba(0,0,0,.45)}
+.result-wheel{width:72px;height:72px;margin:14px 0 22px;background:rgba(231,190,117,.08);box-shadow:none}
+.result-wheel:before,.result-wheel:after{display:none}
+.result-copy h2{font-family:Manrope,system-ui,sans-serif;font-weight:600}
+.insight-card{align-items:flex-start;margin-top:26px;padding:24px 5px}
+.moon-icon{font:16px Manrope;width:30px;height:30px;display:grid;place-items:center;border-radius:50%;background:rgba(231,190,117,.1)}
+.transit-copy{flex:1}
+.transit-copy>p{margin-bottom:14px}
+.practical-advice{display:grid;gap:5px;padding:13px 14px;border-radius:12px;background:rgba(231,190,117,.1);border:1px solid rgba(231,190,117,.18)}
+.practical-advice small{color:var(--gold);font-size:9px;letter-spacing:.11em;font-weight:700}
+.practical-advice span{font-size:12px;line-height:1.5;color:#e8e2d8}
+.forecast-modal h2{margin:9px 0 22px}
+.forecast-detail{gap:10px}
+.forecast-detail article{background:rgba(255,255,255,.025);padding:17px}
+.forecast-detail article p{margin:6px 0 0!important}
+.forecast-note{margin-top:18px}
 .planet-row{display:grid;grid-template-columns:1fr auto auto;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px}
 .planet-row span{color:var(--muted)}
 .planet-row b{color:var(--gold)}
