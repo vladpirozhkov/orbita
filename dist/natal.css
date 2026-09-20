@@ -533,6 +533,15 @@ html[data-theme="dark"] .modal-close{
 .dream-pagination button{width:46px;height:46px;border:1px solid rgba(105,109,92,.2);border-radius:50%;background:rgba(255,255,255,.4);color:var(--ink);font-size:21px;cursor:pointer;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
 .dream-pagination button:disabled{opacity:.28;cursor:default}
 .dream-pagination span{text-align:center;color:var(--muted);font-size:13px;font-weight:700}
+.dream-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.dream-actions button,.secondary-btn,.danger-btn{min-height:46px;border:1px solid rgba(105,109,92,.2);border-radius:13px;background:rgba(255,255,255,.38);color:var(--ink);font-weight:700;cursor:pointer}
+.dream-actions .danger,.danger-btn{color:#9A4949;border-color:rgba(154,73,73,.22);background:rgba(154,73,73,.07)}
+.dream-editor form{display:grid;gap:15px;margin-top:22px}
+.dream-editor label{display:grid;gap:7px;color:var(--muted);font-size:14px;font-weight:600}
+.dream-editor input,.dream-editor textarea{width:100%;min-width:0;border:1px solid rgba(105,109,92,.18);border-radius:14px;background:rgba(255,255,255,.5);color:var(--ink);outline:none;padding:13px 14px;font-size:16px}
+.dream-editor textarea{min-height:190px;resize:vertical;line-height:1.55}
+.dream-editor-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:5px}
+.dream-delete-confirm h2{margin-top:12px}
 html[data-theme="dark"] .dream-date-field input,html[data-theme="dark"] .dream-entry textarea{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.1);color:var(--ink)}
-html[data-theme="dark"] .dream-pagination button{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12)}
+html[data-theme="dark"] .dream-pagination button,html[data-theme="dark"] .dream-actions button,html[data-theme="dark"] .secondary-btn,html[data-theme="dark"] .dream-editor input,html[data-theme="dark"] .dream-editor textarea{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12);color:var(--ink)}
 @media(max-width:370px){.greeting span,.greeting h1{font-size:20px!important}.bottom-nav button small{font-size:11px}.bottom-nav .nav-icon{width:23px;height:23px}}
