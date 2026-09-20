@@ -231,3 +231,57 @@ dialog::backdrop{background:rgba(34,61,76,.3)}
 
 @media(min-width:800px){.app-shell{background:rgba(255,255,255,.24);border-color:rgba(67,144,188,.12);box-shadow:0 24px 70px rgba(47,101,132,.12)}}
 @media(max-width:520px){.feature-card{padding:18px 16px;gap:13px}.feature-card>span{flex-basis:52px;height:52px}.feature-card h2{font-size:17px}.feature-card p{font-size:12px}.matrix-summary span{padding:12px 5px}.compatibility-total{align-items:flex-start}.compatibility-card summary small{max-width:220px}}
+
+/* Mobile forms and modal containment */
+dialog{overflow-x:hidden;overscroll-behavior:contain}
+#modal-content,.result-copy,.partner-flow,.compatibility-flow,.natal-form,.natal-form label{width:100%;max-width:100%;min-width:0}
+#modal-content,.result-copy{overflow-x:hidden;overflow-wrap:anywhere}
+.natal-form{grid-template-columns:minmax(0,1fr)}
+.natal-form input{display:block;width:100%;max-width:100%;min-width:0;min-height:54px;margin:0;padding:14px 16px;text-align:left;font-size:16px;line-height:1.2;border-radius:14px}
+.natal-form input[type="date"],.natal-form input[type="time"]{text-align:left;-webkit-appearance:none;appearance:none}
+.natal-form input[type="date"]::-webkit-date-and-time-value,.natal-form input[type="time"]::-webkit-date-and-time-value{text-align:left;margin:0}
+.natal-form .primary-btn{width:100%;min-width:0}
+.modal-close{width:40px;height:40px;padding:0;border:0!important;outline:0!important;box-shadow:none!important;background:transparent!important;border-radius:50%;display:grid;place-items:center;-webkit-appearance:none;appearance:none}
+.modal-close:focus-visible{background:rgba(67,144,188,.1)!important}
+.reading-points{display:grid;gap:12px;padding:0 16px 17px}
+.reading-points p{margin:0!important;color:var(--muted)!important;line-height:1.55}
+.reading-points b{display:block;margin-bottom:3px;color:var(--ink)}
+.app-menu button{display:flex;align-items:center;justify-content:space-between;gap:16px}
+
+/* Softer category icons on Today */
+.scores b,.scores strong,.scores small{font-family:Nunito,system-ui,sans-serif!important}
+.scores b{font-weight:800}
+.score-icon.coral{color:#D9879A;background:#F8E2E8}
+.score-icon.gold{color:#424B51;background:#E7ECEF}
+.score-icon.blue{color:#C1A15C;background:#F7EDD3}
+
+/* Dark theme keeps the original Orbita palette and the same rounded type */
+html[data-theme="dark"]{--bg:#090817;--panel:#151329;--panel2:#1d1934;--ink:#f7f1e6;--muted:#a7a1b7;--gold:#e7be75;--coral:#ef8b7c;--blue:#7e9ee8;--line:rgba(255,255,255,.09);background:#090817;color-scheme:dark}
+html[data-theme="dark"] body{background:radial-gradient(circle at 70% -10%,#292154 0,transparent 35%),#090817;color:var(--ink)}
+html[data-theme="dark"] .app-shell{background:transparent;border-color:rgba(255,255,255,.07)}
+html[data-theme="dark"] .topbar{background:rgba(18,16,35,.92);border-color:rgba(255,255,255,.08);box-shadow:0 12px 34px rgba(0,0,0,.32)}
+html[data-theme="dark"] .brand{color:var(--ink)}
+html[data-theme="dark"] .avatar,html[data-theme="dark"] .icon-btn{background:#211e35;color:#e7be75}
+html[data-theme="dark"] .menu-button span{background:#e7be75}
+html[data-theme="dark"] .brand span,html[data-theme="dark"] .date-line,html[data-theme="dark"] .eyebrow,html[data-theme="dark"] .text-link,html[data-theme="dark"] .feature-card small,html[data-theme="dark"] .feature-card>b,html[data-theme="dark"] .reading-card summary small,html[data-theme="dark"] .reading-card summary b,html[data-theme="dark"] .positions summary{color:#e7be75}
+html[data-theme="dark"] .cosmic-card,html[data-theme="dark"] .feature-card,html[data-theme="dark"] .scores>button,html[data-theme="dark"] .dream-entry,html[data-theme="dark"] .dream-item,html[data-theme="dark"] .chat-form,html[data-theme="dark"] .profile-form input,html[data-theme="dark"] .profile-form select,html[data-theme="dark"] .natal-form input,html[data-theme="dark"] .message.bot{background:#151329;border-color:rgba(255,255,255,.09);color:var(--ink);box-shadow:0 12px 30px rgba(0,0,0,.2)}
+html[data-theme="dark"] .feature-card:hover,html[data-theme="dark"] .feature-card:focus-visible{background:#1d1934;border-color:rgba(231,190,117,.35)}
+html[data-theme="dark"] .feature-card>span,html[data-theme="dark"] .result-wheel,html[data-theme="dark"] .loading-card span{background:#211d39;border-color:rgba(231,190,117,.4);color:#e7be75}
+html[data-theme="dark"] .primary-btn,html[data-theme="dark"] .chat-form button{background:#e7be75;color:#17101e}
+html[data-theme="dark"] .primary-btn:hover,html[data-theme="dark"] .primary-btn:focus-visible{background:#f0cf90}
+html[data-theme="dark"] .bottom-nav{background:rgba(18,16,35,.94);border-color:rgba(255,255,255,.08);box-shadow:0 16px 42px rgba(0,0,0,.34)}
+html[data-theme="dark"] .bottom-nav button.active{background:#27223c;color:#e7be75}
+html[data-theme="dark"] dialog{background:#151329;color:var(--ink);border-color:rgba(255,255,255,.09);box-shadow:0 28px 80px rgba(0,0,0,.5)}
+html[data-theme="dark"] dialog::backdrop{background:rgba(4,3,12,.72)}
+html[data-theme="dark"] .reading-card,html[data-theme="dark"] .reading-block,html[data-theme="dark"] .forecast-block,html[data-theme="dark"] .forecast-detail article,html[data-theme="dark"] .sphere-popup .do-dont div,html[data-theme="dark"] .compatibility-card{background:#1d1934;border-color:rgba(255,255,255,.08)}
+html[data-theme="dark"] .reading-points b{color:#f7f1e6}
+html[data-theme="dark"] .matrix-summary span,html[data-theme="dark"] .compatibility-total,html[data-theme="dark"] .compatibility-note,html[data-theme="dark"] .practical-advice,html[data-theme="dark"] .growth-note{background:#242039;border-color:rgba(231,190,117,.24);color:#cfc8d8}
+html[data-theme="dark"] .matrix-summary b,html[data-theme="dark"] .compatibility-total>span{color:#e7be75}
+html[data-theme="dark"] .compatibility-card summary>b{background:#3a3150;color:#f1d79f}
+html[data-theme="dark"] .result-tags span,html[data-theme="dark"] .suggestions button{background:#252038;border-color:rgba(231,190,117,.22);color:#e7be75}
+html[data-theme="dark"] .place-results{background:#1d1934;border-color:rgba(255,255,255,.1)}
+html[data-theme="dark"] .place-results button{color:var(--ink)}
+html[data-theme="dark"] .practical-advice span{color:#eee7f4}
+html[data-theme="dark"] .modal-close:focus-visible{background:rgba(255,255,255,.07)!important}
+
+@media(max-width:520px){dialog{width:calc(100% - 20px);max-width:calc(100% - 20px)}.partner-flow,.compatibility-flow{padding-top:4px}.natal-form{gap:16px}.natal-form label{font-size:14px;text-align:left}.natal-form input{font-size:16px;text-align:left}.reading-points{padding-left:14px;padding-right:14px}}
