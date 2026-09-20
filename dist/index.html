@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#D8E9F3" />
+  <meta name="theme-color" content="#E7E8D6" />
   <title>Орбита — персональный проводник</title>
-  <meta name="description" content="Персональный астрологический ассистент: натальная карта, матрица судьбы, совместимость и дневник снов." />
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='27' fill='%23D8E9F3' stroke='%234390BC' stroke-width='3'/%3E%3Cpath d='M17 38c12 7 25 4 34-8' fill='none' stroke='%234390BC' stroke-width='3' stroke-linecap='round'/%3E%3Ccircle cx='38' cy='22' r='7' fill='%238DBDD8'/%3E%3C/svg%3E" />
+  <meta name="description" content="Персональное астрологическое приложение: натальная карта, матрица судьбы, совместимость и дневник снов." />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='27' fill='%23E7E8D6' stroke='%23696D5C' stroke-width='3'/%3E%3Cpath d='M17 38c12 7 25 4 34-8' fill='none' stroke='%23696D5C' stroke-width='3' stroke-linecap='round'/%3E%3Ccircle cx='38' cy='22' r='7' fill='%239EA289'/%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -60,7 +60,7 @@
 
     <section id="dreams" class="view" aria-labelledby="dreams-title">
       <button class="view-back" data-back type="button">← <span>Назад</span></button>
-      <div class="page-head"><div class="eyebrow">ДНЕВНИК СНОВ</div><h1 id="dreams-title">Что тебе снилось?</h1><p>Опиши сон — ассистент найдёт символы, эмоции и возможные смыслы.</p></div>
+      <div class="page-head"><div class="eyebrow">ДНЕВНИК СНОВ</div><h1 id="dreams-title">Что тебе снилось?</h1><p>Опиши сон — Орбита поможет найти символы, эмоции и возможные смыслы.</p></div>
       <form id="dream-form" class="dream-entry">
         <textarea id="dream-text" placeholder="Я оказался у моря, вода была очень тёмной…" required></textarea>
         <div class="form-row"><button type="button" class="voice-btn" aria-label="Записать голосом">◉</button><button type="submit" class="primary-btn">Разобрать сон <span>✦</span></button></div>
@@ -70,18 +70,6 @@
         <button class="dream-item"><span>🌊</span><div><small>14 сентября</small><strong>Тёмная вода и старый дом</strong><p>Переход · тревога · прошлое</p></div><b>→</b></button>
         <button class="dream-item"><span>🌲</span><div><small>5 августа</small><strong>Дорога через лес</strong><p>Поиск · направление · выбор</p></div><b>→</b></button>
       </div>
-    </section>
-
-    <section id="assistant" class="view chat-view" aria-labelledby="assistant-title">
-      <button class="view-back" data-back type="button">← <span>Назад</span></button>
-      <div class="assistant-head"><span class="orb">✦</span><div><div class="eyebrow">ПЕРСОНАЛЬНЫЙ АССИСТЕНТ</div><h1 id="assistant-title">Спроси Орбиту</h1></div></div>
-      <div id="chat" class="chat">
-        <div class="message bot">Я знаю контекст твоей карты, матрицы и дневника снов. О чём хочешь поговорить?</div>
-        <div class="suggestions">
-          <button>Какая тема у этой недели?</button><button>Хороший ли завтра день для встречи?</button><button>Почему мне часто снится вода?</button>
-        </div>
-      </div>
-      <form id="chat-form" class="chat-form"><input id="chat-input" placeholder="Напиши свой вопрос…" autocomplete="off"/><button aria-label="Отправить">↑</button></form>
     </section>
 
     <section id="profile" class="view" aria-labelledby="profile-title">
@@ -104,7 +92,6 @@
       <button class="active" data-view="today"><span>☼</span><small>Сегодня</small></button>
       <button data-view="charts"><span>◇</span><small>Карты</small></button>
       <button data-view="dreams"><span>☾</span><small>Сны</small></button>
-      <button data-view="assistant"><span>✦</span><small>Ассистент</small></button>
     </nav>
   </main>
 
