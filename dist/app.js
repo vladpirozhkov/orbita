@@ -2,9 +2,13 @@ const $=(s,c=document)=>c.querySelector(s);const $$=(s,c=document)=>[...c.queryS
 const months=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
 const days=['воскресенье','понедельник','вторник','среда','четверг','пятница','суббота'];
 const now=new Date();$('#current-date').textContent=`${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]}`;
-function showView(id){$$('.view').forEach(v=>v.classList.toggle('active',v.id===id));$$('.bottom-nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===id));scrollTo({top:0,behavior:'smooth'})}
-$$('[data-view]').forEach(b=>b.onclick=()=>showView(b.dataset.view));$('[data-action="profile"]').onclick=()=>showView('profile');
+let currentView='today';const viewHistory=[];
+function showView(id,remember=true){if(id===currentView)return;if(remember)viewHistory.push(currentView);currentView=id;$$('.view').forEach(v=>v.classList.toggle('active',v.id===id));$$('.bottom-nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===id));scrollTo({top:0,behavior:'smooth'})}
+function goBack(){const previous=viewHistory.pop()||'today';showView(previous,false)}
+$$('[data-view]').forEach(b=>b.onclick=()=>showView(b.dataset.view));$$('[data-back]').forEach(b=>b.onclick=goBack);
 const modal=$('#modal'),content=$('#modal-content');$('.modal-close').onclick=()=>modal.close();
+function openMenu(){content.innerHTML=`<div class="app-menu"><div class="eyebrow">МЕНЮ</div><h2>Орбита</h2><button data-menu-view="today">Сегодня</button><button data-menu-view="charts">Карты</button><button data-menu-view="dreams">Дневник снов</button><button data-menu-view="assistant">Ассистент</button><button data-menu-view="profile">Профиль</button></div>`;modal.showModal();$$('[data-menu-view]',content).forEach(button=>button.onclick=()=>{modal.close();showView(button.dataset.menuView)})}
+$('[data-action="menu"]').onclick=openMenu;
 const flowCopy={
  natal:{k:'НАТАЛЬНАЯ КАРТА',n:'Солнце в Водолее',v:'☉',p:'Независимое мышление сочетается у тебя с сильной потребностью находить смысл и создавать системы. Твоя карта подчёркивает ценность свободы, но близкие отношения требуют честно проговаривать границы.',tags:['Солнце · Водолей','Луна · Весы','Асцендент · Скорпион']},
  matrix:{k:'МАТРИЦА СУДЬБЫ',n:'Твой центр — 10 аркан',v:'10',p:'Твоя ключевая тема — видеть возможности в переменах и превращать хаос в направление. Сильная сторона — адаптивность; задача — не отдавать решения на волю обстоятельств.',tags:['Характер · 3','Предназначение · 11','Ресурс · 19']},
