@@ -533,8 +533,10 @@ html[data-theme="dark"] .modal-close{
 .dream-pagination button{width:46px;height:46px;border:1px solid rgba(105,109,92,.2);border-radius:50%;background:rgba(255,255,255,.4);color:var(--ink);font-size:21px;cursor:pointer;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
 .dream-pagination button:disabled{opacity:.28;cursor:default}
 .dream-pagination span{text-align:center;color:var(--muted);font-size:13px;font-weight:700}
-.dream-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.dream-actions{display:grid;grid-template-columns:46px 46px;justify-content:end;gap:9px;margin-top:18px}
 .dream-actions button,.secondary-btn,.danger-btn{min-height:46px;border:1px solid rgba(105,109,92,.2);border-radius:13px;background:rgba(255,255,255,.38);color:var(--ink);font-weight:700;cursor:pointer}
+.dream-actions button{width:46px;height:46px;display:grid;place-items:center;padding:0}
+.dream-actions svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .dream-actions .danger,.danger-btn{color:#9A4949;border-color:rgba(154,73,73,.22);background:rgba(154,73,73,.07)}
 .dream-editor form{display:grid;gap:15px;margin-top:22px}
 .dream-editor label{display:grid;gap:7px;color:var(--muted);font-size:14px;font-weight:600}
