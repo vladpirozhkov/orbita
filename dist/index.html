@@ -17,7 +17,7 @@
   <div class="sky" aria-hidden="true"></div>
   <main class="app-shell">
     <header class="topbar">
-      <button class="avatar" data-action="profile" aria-label="Открыть профиль">В</button>
+      <button class="avatar menu-button" data-action="menu" aria-label="Открыть меню"><span></span><span></span><span></span></button>
       <div class="brand">ОРБИТА <span>✦</span></div>
       <button class="icon-btn" data-action="notifications" aria-label="Уведомления">
         <svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>
@@ -47,6 +47,7 @@
     </section>
 
     <section id="charts" class="view" aria-labelledby="charts-title">
+      <button class="view-back" data-back type="button">← <span>Назад</span></button>
       <div class="page-head"><div class="eyebrow">ПОЗНАЙ СЕБЯ</div><h1 id="charts-title">Твои карты</h1><p>Расчёты по данным рождения с персональной интерпретацией.</p></div>
       <div class="feature-grid">
         <button class="feature-card natal" data-flow="natal"><span class="mini-chart">☉</span><div><small>АСТРОЛОГИЯ</small><h2>Натальная карта</h2><p>Планеты, дома, аспекты и твои сильные стороны</p></div><b>→</b></button>
@@ -56,6 +57,7 @@
     </section>
 
     <section id="dreams" class="view" aria-labelledby="dreams-title">
+      <button class="view-back" data-back type="button">← <span>Назад</span></button>
       <div class="page-head"><div class="eyebrow">ДНЕВНИК СНОВ</div><h1 id="dreams-title">Что тебе снилось?</h1><p>Опиши сон — ассистент найдёт символы, эмоции и возможные смыслы.</p></div>
       <form id="dream-form" class="dream-entry">
         <textarea id="dream-text" placeholder="Я оказался у моря, вода была очень тёмной…" required></textarea>
@@ -69,6 +71,7 @@
     </section>
 
     <section id="assistant" class="view chat-view" aria-labelledby="assistant-title">
+      <button class="view-back" data-back type="button">← <span>Назад</span></button>
       <div class="assistant-head"><span class="orb">✦</span><div><div class="eyebrow">ПЕРСОНАЛЬНЫЙ АССИСТЕНТ</div><h1 id="assistant-title">Спроси Орбиту</h1></div></div>
       <div id="chat" class="chat">
         <div class="message bot">Я знаю контекст твоей карты, матрицы и дневника снов. О чём хочешь поговорить?</div>
@@ -80,6 +83,7 @@
     </section>
 
     <section id="profile" class="view" aria-labelledby="profile-title">
+      <button class="view-back" data-back type="button">← <span>Назад</span></button>
       <div class="page-head"><div class="eyebrow">ЛИЧНЫЕ ДАННЫЕ</div><h1 id="profile-title">Профиль рождения</h1><p>Они нужны для персональных расчётов и прогноза.</p></div>
       <form id="profile-form" class="profile-form">
         <label>Имя<input name="name" value="Алекс" required></label>
