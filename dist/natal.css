@@ -250,7 +250,7 @@ dialog{overflow-x:hidden;overscroll-behavior:contain}
 
 /* Softer category icons on Today */
 .scores b,.scores strong,.scores small{font-family:Nunito,system-ui,sans-serif!important}
-.scores b{font-weight:800}
+.scores b{display:inline-flex;align-items:baseline;gap:4px;font-weight:800}
 .score-icon.coral{color:#D9879A;background:#F8E2E8}
 .score-icon.gold{color:#424B51;background:#E7ECEF}
 .score-icon.blue{color:#C1A15C;background:#F7EDD3}
