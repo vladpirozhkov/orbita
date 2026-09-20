@@ -321,3 +321,53 @@ html[data-theme="dark"] .interpretation-section>summary strong,html[data-theme="
 html[data-theme="dark"] .interpretation-section>summary>b,html[data-theme="dark"] .interpretation-item small{color:#e7be75}
 
 @media(max-width:520px){.natal-overview{gap:6px}.natal-overview>div{padding:11px 6px}.natal-overview strong{font-size:12px}.interpretation-section>summary{padding:15px}.interpretation-list{padding:0 14px 14px}.interpretation-item>div,.synastry-list li{display:grid;gap:4px}.interpretation-item small,.synastry-list li span{text-align:left}.interpretation-item p{font-size:13px!important}}
+
+/* Olive palette sampled from the supplied Tikkurila reference */
+:root{
+  --bg:#E7E8D6;
+  --panel:#ffffff;
+  --panel2:#F3F3E9;
+  --ink:#30342C;
+  --muted:#6F7366;
+  --gold:#696D5C;
+  --coral:#8E9375;
+  --blue:#9EA289;
+  --line:rgba(105,109,92,.18);
+}
+html{background:#E7E8D6}
+body{background:linear-gradient(180deg,#E7E8D6 0,#F3F3E9 56%,#E7E8D6 100%)}
+.topbar{border-color:rgba(105,109,92,.18);box-shadow:0 12px 34px rgba(105,109,92,.14)}
+.avatar,.icon-btn{background:#E7E8D6;color:#696D5C}
+.brand span,.date-line,.eyebrow,.text-link,.feature-card small,.feature-card>b,.bottom-nav button.active,.reading-card summary small,.reading-card summary b,.positions summary,.result-wheel span,.result-tags span,.planet-row b,.interpretation-section>summary>b,.interpretation-item small{color:#696D5C}
+.menu-button span{background:#696D5C}
+.cosmic-card,.feature-card,.scores>button,.dream-entry,.dream-item,.profile-form input,.profile-form select,.natal-form input{border-color:rgba(105,109,92,.16);box-shadow:0 9px 28px rgba(105,109,92,.09)}
+.feature-card:hover,.feature-card:focus-visible{background:#F3F3E9;border-color:#9EA289}
+.feature-card>span,.score-icon,.result-wheel,.loading-card span{background:#E7E8D6;border-color:#ADAD95;color:#696D5C}
+.primary-btn{background:#696D5C;color:#fff}
+.primary-btn:hover,.primary-btn:focus-visible{background:#81856E}
+.toggle-row i{background:#8E9375}
+.practical-advice,.growth-note{background:#E7E8D6;border-color:#ADAD95}
+.practical-advice small{color:#696D5C}
+.practical-advice span{color:#3F4439}
+.moon-icon{background:#E7E8D6;color:#696D5C}
+.bottom-nav{grid-template-columns:repeat(3,1fr);background:rgba(255,255,255,.94);border-color:rgba(105,109,92,.16);box-shadow:0 14px 34px rgba(105,109,92,.15)}
+.bottom-nav button.active{background:#E7E8D6}
+.result-tags span{background:#F3F3E9;border-color:#ADAD95;color:#696D5C}
+.reading-card,.reading-block,.forecast-block,.forecast-detail article,.sphere-popup .do-dont div,.interpretation-section,.compatibility-card{background:#F8F8F2;border-color:rgba(105,109,92,.16)}
+.place-results{border-color:#ADAD95;box-shadow:0 14px 30px rgba(105,109,92,.13)}
+#toast{background:#3F4439;color:#fff}
+dialog::backdrop{background:rgba(63,68,57,.3)}
+.matrix-summary span,.compatibility-total,.compatibility-note,.natal-overview>div{background:#E7E8D6}
+.matrix-summary b,.compatibility-total>span{color:#696D5C}
+.reading-card>p b{color:#565B4C}
+.compatibility-card{border-color:rgba(105,109,92,.17)}
+.compatibility-card summary>b{background:#9EA289;color:#25291F}
+.compatibility-note{border-left-color:#696D5C}
+.modal-close:focus-visible{background:rgba(105,109,92,.12)!important}
+
+/* Dark theme uses warm gold and neutral tones only */
+html[data-theme="dark"]{--blue:#c9ae73}
+html[data-theme="dark"] .score-icon.blue{color:#C1A15C;background:#342D22}
+html[data-theme="dark"] .score-icon.gold{color:#BBB5AC;background:#292832}
+html[data-theme="dark"] .score-icon.coral{color:#D9879A;background:#37242E}
+@media(min-width:800px){.app-shell{background:rgba(255,255,255,.24);border-color:rgba(105,109,92,.14);box-shadow:0 24px 70px rgba(105,109,92,.12)}}
