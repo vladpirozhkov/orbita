@@ -77,6 +77,41 @@ dialog{background:#171522;border-radius:20px;padding:30px;box-shadow:0 24px 70px
 .forecast-detail article{background:rgba(255,255,255,.025);padding:17px}
 .forecast-detail article p{margin:6px 0 0!important}
 .forecast-note{margin-top:18px}
+.menu-button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.menu-button span{display:block;width:18px;height:1.5px;background:currentColor;border-radius:2px}
+.view-back{display:inline-flex;align-items:center;gap:7px;margin:14px 0 0;padding:9px 0;border:0;background:none;color:var(--muted);font-size:14px;cursor:pointer}
+.view-back:hover{color:var(--ink)}
+.app-menu{display:grid;gap:8px}
+.app-menu h2{margin:2px 0 14px;font:600 26px Manrope,system-ui,sans-serif}
+.app-menu button{width:100%;padding:15px 4px;border:0;border-bottom:1px solid var(--line);background:none;color:var(--ink);text-align:left;font-size:16px;cursor:pointer}
+
+@media(max-width:520px){
+  html{-webkit-text-size-adjust:100%;overflow-x:hidden}
+  body{padding:0;overflow-x:hidden}
+  .app-shell{width:100%;max-width:none;padding:0 16px calc(132px + env(safe-area-inset-bottom));overflow:hidden}
+  .topbar{height:66px}
+  .avatar,.icon-btn{width:42px;height:42px}
+  .page-head{padding:18px 0 20px}
+  .page-head h1,.greeting h1{font-size:clamp(30px,9vw,38px);line-height:1.12}
+  .page-head p{font-size:15px;line-height:1.5}
+  .view-back{margin-top:8px}
+  .profile-form{width:100%;gap:16px}
+  .profile-form label{width:100%;min-width:0;gap:8px;font-size:14px;text-align:left}
+  .profile-form input,.profile-form select{display:block;width:100%;max-width:100%;min-width:0;min-height:54px;margin:0;padding:14px 16px;border-radius:12px;text-align:left;font-size:16px;line-height:1.2}
+  .profile-form input[type="date"],.profile-form input[type="time"]{text-align:left;-webkit-appearance:none;appearance:none}
+  .profile-form input[type="date"]::-webkit-date-and-time-value,.profile-form input[type="time"]::-webkit-date-and-time-value{text-align:left;margin:0}
+  .form-state{font-size:13px;line-height:1.4;text-align:left}
+  .toggle-row{gap:14px}
+  .bottom-nav{bottom:calc(10px + env(safe-area-inset-bottom));width:calc(100% - 20px);height:68px;border-radius:17px}
+  .bottom-nav button{min-width:0;padding:4px 2px}
+  .bottom-nav button small{font-size:10px}
+  dialog{width:calc(100% - 20px);max-height:calc(100dvh - 24px);padding:24px 20px;border-radius:18px}
+  .modal-close{right:12px;top:10px}
+  .scores{gap:8px}
+  .scores>button{min-width:0;padding:12px 9px}
+  .scores>button strong{font-size:10px}
+  .forecast-card{padding:24px 20px}
+}
 .planet-row{display:grid;grid-template-columns:1fr auto auto;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px}
 .planet-row span{color:var(--muted)}
 .planet-row b{color:var(--gold)}
