@@ -48,7 +48,6 @@
     </section>
 
     <section id="charts" class="view" aria-labelledby="charts-title">
-      <button class="view-back" data-back type="button">← <span>Назад</span></button>
       <div class="page-head"><div class="eyebrow">ПОЗНАЙ СЕБЯ</div><h1 id="charts-title">Твои карты</h1><p>Расчёты по данным рождения с персональной интерпретацией.</p></div>
       <div class="feature-grid">
         <button class="feature-card natal" data-flow="natal"><span class="mini-chart">☉</span><div><small>ТВОИ ДАННЫЕ РОЖДЕНИЯ</small><h2>Моя натальная карта</h2><p>Персональная карта и подробная интерпретация</p></div><b>→</b></button>
@@ -59,7 +58,6 @@
     </section>
 
     <section id="dreams" class="view" aria-labelledby="dreams-title">
-      <button class="view-back" data-back type="button">← <span>Назад</span></button>
       <div class="page-head"><div class="eyebrow">ДНЕВНИК СНОВ</div><h1 id="dreams-title">Что тебе снилось?</h1><p>Опиши сон — Орбита поможет найти символы, эмоции и возможные смыслы.</p></div>
       <form id="dream-form" class="dream-entry">
         <textarea id="dream-text" placeholder="Я оказался у моря, вода была очень тёмной…" required></textarea>
@@ -89,9 +87,9 @@
     </section>
 
     <nav class="bottom-nav" aria-label="Основная навигация">
-      <button class="active" data-view="today"><span>☼</span><small>Сегодня</small></button>
-      <button data-view="charts"><span>◇</span><small>Карты</small></button>
-      <button data-view="dreams"><span>☾</span><small>Сны</small></button>
+      <button class="active" data-view="today" aria-label="Главный экран"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3.5 10.5 12 3l8.5 7.5"/><path d="M5.5 9.5V21h13V9.5M9.5 21v-6h5v6"/></svg></span><small>Главная</small></button>
+      <button data-view="charts" aria-label="Карты"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 3v6M12 15v6M3 12h6M15 12h6M5.64 5.64l4.24 4.24M14.12 14.12l4.24 4.24M18.36 5.64l-4.24 4.24M9.88 14.12l-4.24 4.24"/></svg></span><small>Карты</small></button>
+      <button data-view="dreams" aria-label="Сны"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 15.2A8.6 8.6 0 0 1 8.8 4a8.7 8.7 0 1 0 11.2 11.2Z"/></svg></span><small>Сны</small></button>
     </nav>
   </main>
 
