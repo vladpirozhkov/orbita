@@ -21,9 +21,7 @@
     <header class="topbar">
       <button class="avatar menu-button" data-action="menu" aria-label="Открыть меню"><span></span><span></span><span></span></button>
       <div class="brand">ОРБИТА <span>✦</span></div>
-      <button class="icon-btn" data-action="notifications" aria-label="Уведомления">
-        <svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>
-      </button>
+      <span class="topbar-spacer" aria-hidden="true" style="display:block;width:44px;height:44px;flex:0 0 44px"></span>
     </header>
 
     <section id="today" class="view active" aria-labelledby="today-title">
@@ -44,7 +42,7 @@
         <button type="button" data-sphere="energy"><span class="score-icon blue">ϟ</span><strong>Энергия</strong><b><span id="score-energy">—</span><small>/10</small></b><i id="bar-energy" style="--score:0%"></i></button>
       </div>
       <article class="insight-card">
-        <span class="moon-icon">●</span><div class="transit-copy"><div class="eyebrow">КЛЮЧЕВОЙ ТРАНЗИТ</div><strong id="transit-title">Заполни профиль</strong><p id="forecast-advice">После заполнения профиля здесь появится объяснение главного акцента дня.</p><div class="practical-advice"><small>ПРАКТИЧЕСКИЙ СОВЕТ</small><span id="transit-practical">Сохрани данные рождения в профиле.</span></div></div>
+        <span class="moon-icon">●</span><div class="transit-copy"><div class="eyebrow">КЛЮЧЕВОЙ <button type="button" class="term-link" data-term="Транзит">ТРАНЗИТ</button></div><strong id="transit-title">Заполни профиль</strong><p id="forecast-advice">После заполнения профиля здесь появится объяснение главного акцента дня.</p><div class="practical-advice"><small>ПРАКТИЧЕСКИЙ СОВЕТ</small><span id="transit-practical">Сохрани данные рождения в профиле.</span></div></div>
       </article>
     </section>
 
@@ -70,6 +68,11 @@
       <div id="dream-list" class="dream-list"></div>
     </section>
 
+    <section id="glossary" class="view" aria-labelledby="glossary-title">
+      <div class="page-head"><div class="eyebrow">ПРОСТЫМИ СЛОВАМИ</div><h1 id="glossary-title">Словарь</h1><p>Короткие объяснения терминов из натальной карты и матрицы судьбы.</p></div>
+      <div id="glossary-list" class="glossary-list"></div>
+    </section>
+
     <section id="profile" class="view" aria-labelledby="profile-title">
       <button class="view-back" data-back type="button">← <span>Назад</span></button>
       <div class="page-head"><div class="eyebrow">ЛИЧНЫЕ ДАННЫЕ</div><h1 id="profile-title">Профиль рождения</h1><p>Они нужны для персональных расчётов и прогноза.</p></div>
@@ -81,7 +84,6 @@
         <div class="place-results" id="profile-place-results"></div>
         <input name="latitude" type="hidden"><input name="longitude" type="hidden"><input name="timezone" type="hidden">
         <div class="form-state" id="profile-place-state">Выберите город из списка — часовой пояс определится автоматически.</div>
-        <label class="toggle-row"><span><strong>Ежедневный прогноз</strong><small>Получать в Telegram каждое утро</small></span><input type="checkbox" checked><i></i></label>
         <button class="primary-btn" type="submit">Сохранить профиль</button>
       </form>
     </section>
@@ -90,12 +92,19 @@
       <button class="active" data-view="today" aria-label="Главный экран"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3.5 10.5 12 3l8.5 7.5"/><path d="M5.5 9.5V21h13V9.5M9.5 21v-6h5v6"/></svg></span><small>Главная</small></button>
       <button data-view="charts" aria-label="Карты"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 3v6M12 15v6M3 12h6M15 12h6M5.64 5.64l4.24 4.24M14.12 14.12l4.24 4.24M18.36 5.64l-4.24 4.24M9.88 14.12l-4.24 4.24"/></svg></span><small>Карты</small></button>
       <button data-view="dreams" aria-label="Сны"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 15.2A8.6 8.6 0 0 1 8.8 4a8.7 8.7 0 1 0 11.2 11.2Z"/></svg></span><small>Сны</small></button>
+      <button data-view="glossary" aria-label="Словарь"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v16H6.5A2.5 2.5 0 0 0 4 21.5v-16Z"/><path d="M20 5.5A2.5 2.5 0 0 0 17.5 3H13v16h4.5a2.5 2.5 0 0 1 2.5 2.5v-16Z"/></svg></span><small>Словарь</small></button>
     </nav>
   </main>
 
   <dialog id="modal">
     <div class="modal-handle"></div><button class="modal-close" aria-label="Закрыть">×</button><div id="modal-content"></div>
   </dialog>
+  <div id="term-informer" class="term-informer" hidden>
+    <section class="term-informer-card" role="dialog" aria-modal="true" aria-labelledby="term-title">
+      <button class="term-close" type="button" aria-label="Закрыть пояснение">×</button>
+      <div class="eyebrow">СЛОВАРЬ</div><h2 id="term-title"></h2><p id="term-description"></p>
+    </section>
+  </div>
   <div id="toast" role="status"></div>
   <script src="./config.js"></script>
   <script src="./app.js"></script>
