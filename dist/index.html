@@ -42,7 +42,7 @@
         <button type="button" data-sphere="energy"><span class="score-icon blue">ϟ</span><strong>Энергия</strong><b><span id="score-energy">—</span><small>/10</small></b><i id="bar-energy" style="--score:0%"></i></button>
       </div>
       <article class="insight-card">
-        <span class="moon-icon">●</span><div class="transit-copy"><div class="eyebrow">КЛЮЧЕВОЙ <button type="button" class="term-link" data-term="Транзит">ТРАНЗИТ</button></div><strong id="transit-title">Заполни профиль</strong><p id="forecast-advice">После заполнения профиля здесь появится объяснение главного акцента дня.</p><div class="practical-advice"><small>ПРАКТИЧЕСКИЙ СОВЕТ</small><span id="transit-practical">Сохрани данные рождения в профиле.</span></div></div>
+        <span class="moon-icon">●</span><div class="transit-copy"><div class="eyebrow">КЛЮЧЕВОЙ ТРАНЗИТ</div><strong id="transit-title">Заполни профиль</strong><p id="forecast-advice">После заполнения профиля здесь появится объяснение главного акцента дня.</p><div class="practical-advice"><small>ПРАКТИЧЕСКИЙ СОВЕТ</small><span id="transit-practical">Сохрани данные рождения в профиле.</span></div></div>
       </article>
     </section>
 
@@ -70,6 +70,8 @@
 
     <section id="glossary" class="view" aria-labelledby="glossary-title">
       <div class="page-head"><div class="eyebrow">ПРОСТЫМИ СЛОВАМИ</div><h1 id="glossary-title">Словарь</h1><p>Короткие объяснения терминов из натальной карты и матрицы судьбы.</p></div>
+      <label class="glossary-search" for="glossary-query"><span class="sr-only">Поиск по словарю</span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg><input id="glossary-query" type="search" autocomplete="off" placeholder="Найти термин" maxlength="60"></label>
+      <p id="glossary-empty" class="glossary-empty" hidden>По этому запросу ничего не найдено.</p>
       <div id="glossary-list" class="glossary-list"></div>
     </section>
 
@@ -99,12 +101,6 @@
   <dialog id="modal">
     <div class="modal-handle"></div><button class="modal-close" aria-label="Закрыть">×</button><div id="modal-content"></div>
   </dialog>
-  <div id="term-informer" class="term-informer" hidden>
-    <section class="term-informer-card" role="dialog" aria-modal="true" aria-labelledby="term-title">
-      <button class="term-close" type="button" aria-label="Закрыть пояснение">×</button>
-      <div class="eyebrow">СЛОВАРЬ</div><h2 id="term-title"></h2><p id="term-description"></p>
-    </section>
-  </div>
   <div id="toast" role="status"></div>
   <script src="./config.js"></script>
   <script src="./app.js"></script>
