@@ -107,7 +107,7 @@ dialog{background:#171522;border-radius:20px;padding:30px;box-shadow:0 24px 70px
   .profile-form input[type="date"]::-webkit-date-and-time-value,.profile-form input[type="time"]::-webkit-date-and-time-value{text-align:left;margin:0}
   .form-state{font-size:13px;line-height:1.4;text-align:left}
   .toggle-row{gap:14px}
-  .bottom-nav{bottom:calc(10px + env(safe-area-inset-bottom));width:calc(100% - 20px);height:68px;border-radius:17px}
+  .bottom-nav{bottom:calc(16px + env(safe-area-inset-bottom));width:calc(100% - 20px);height:68px;border-radius:17px}
   .bottom-nav button{min-width:0;padding:4px 2px}
   .bottom-nav button small{font-size:10px}
   dialog{width:calc(100% - 20px);max-height:calc(100dvh - 24px);padding:24px 20px;border-radius:18px}
@@ -585,7 +585,7 @@ html.telegram-mini-app .app-shell{
   padding-top:calc(94px + var(--tg-content-safe-area-inset-top,0px));
   padding-bottom:calc(104px + var(--tg-content-safe-area-inset-bottom,0px));
 }
-html.telegram-mini-app .bottom-nav{bottom:calc(12px + var(--tg-content-safe-area-inset-bottom,0px))}
+html.telegram-mini-app .bottom-nav{bottom:calc(18px + var(--tg-content-safe-area-inset-bottom,env(safe-area-inset-bottom)))}
 
 /* Fixed mobile viewport: no pinch zoom and no floating navigation above the keyboard */
 html,body{width:100%;max-width:100%;overflow-x:hidden;touch-action:pan-x pan-y}
