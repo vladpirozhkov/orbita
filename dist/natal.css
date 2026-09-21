@@ -558,3 +558,14 @@ html.telegram-mini-app .app-shell{
   padding-bottom:calc(104px + var(--tg-content-safe-area-inset-bottom,0px));
 }
 html.telegram-mini-app .bottom-nav{bottom:calc(12px + var(--tg-content-safe-area-inset-bottom,0px))}
+
+/* Clear mobile input focus and responsive place search */
+input,textarea,select{caret-color:var(--gold);-webkit-user-select:text;user-select:text}
+.profile-form input:focus,.profile-form select:focus,.natal-form input:focus,.dream-entry textarea:focus,.dream-date-field input:focus,.dream-editor input:focus,.dream-editor textarea:focus{
+  border-color:var(--gold)!important;
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 18%,transparent)!important;
+  background:rgba(255,255,255,.82)!important;
+}
+html[data-theme="dark"] .profile-form input:focus,html[data-theme="dark"] .profile-form select:focus,html[data-theme="dark"] .natal-form input:focus,html[data-theme="dark"] .dream-entry textarea:focus,html[data-theme="dark"] .dream-date-field input:focus,html[data-theme="dark"] .dream-editor input:focus,html[data-theme="dark"] .dream-editor textarea:focus{background:rgba(255,255,255,.09)!important}
+.form-state.is-searching::before{content:' ';display:inline-block;width:11px;height:11px;margin-right:7px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;vertical-align:-1px;animation:place-spin .7s linear infinite}
+@keyframes place-spin{to{transform:rotate(360deg)}}
