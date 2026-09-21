@@ -4,6 +4,12 @@ const days=['воскресенье','понедельник','вторник','
 const now=new Date();const todayISO=new Date(Date.now()-now.getTimezoneOffset()*60000).toISOString().slice(0,10);$('#current-date').textContent=`${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]}`;
 const telegramApp=window.Telegram?.WebApp||null;
 if(telegramApp){document.documentElement.classList.add('telegram-mini-app');telegramApp.ready();telegramApp.expand()}
+document.addEventListener('touchmove',event=>{if(event.touches.length>1)event.preventDefault()},{passive:false});
+['gesturestart','gesturechange','gestureend'].forEach(name=>document.addEventListener(name,event=>event.preventDefault(),{passive:false}));
+const visualViewport=window.visualViewport;let stableViewportHeight=Math.max(window.innerHeight,visualViewport?.height||0);
+function inputIsActive(){return /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName||'')}
+function syncKeyboardLayout(){const focused=inputIsActive(),visibleHeight=visualViewport?.height||window.innerHeight,offsetTop=visualViewport?.offsetTop||0;if(!focused)stableViewportHeight=Math.max(stableViewportHeight,window.innerHeight,visibleHeight);const keyboardHeight=Math.max(0,stableViewportHeight-visibleHeight-offsetTop),open=focused&&keyboardHeight>120;document.documentElement.classList.toggle('keyboard-open',open);document.documentElement.style.setProperty('--keyboard-shift',`${open?keyboardHeight+24:0}px`)}
+visualViewport?.addEventListener('resize',syncKeyboardLayout);visualViewport?.addEventListener('scroll',syncKeyboardLayout);window.addEventListener('resize',syncKeyboardLayout);document.addEventListener('focusin',()=>requestAnimationFrame(syncKeyboardLayout));document.addEventListener('focusout',()=>setTimeout(syncKeyboardLayout,120));
 function applyDateLimits(scope=document){$$('input[type="date"]',scope).forEach(input=>{input.max=todayISO;if(input.value>todayISO)input.value=''})}
 let currentView='today';const viewHistory=[];
 function showView(id,remember=true){if(id===currentView)return;if(remember)viewHistory.push(currentView);currentView=id;$$('.view').forEach(v=>v.classList.toggle('active',v.id===id));$$('.bottom-nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===id));scrollTo({top:0,behavior:'smooth'})}
