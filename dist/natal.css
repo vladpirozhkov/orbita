@@ -587,6 +587,12 @@ html.telegram-mini-app .app-shell{
 }
 html.telegram-mini-app .bottom-nav{bottom:calc(12px + var(--tg-content-safe-area-inset-bottom,0px))}
 
+/* Fixed mobile viewport: no pinch zoom and no floating navigation above the keyboard */
+html,body{width:100%;max-width:100%;overflow-x:hidden;touch-action:pan-x pan-y}
+.app-shell{width:100%;max-width:520px}
+.bottom-nav{will-change:transform;transition:transform .18s ease,opacity .18s ease}
+html.keyboard-open .bottom-nav{transform:translate(-50%,var(--keyboard-shift));pointer-events:none}
+
 /* Clear mobile input focus and responsive place search */
 input,textarea,select{caret-color:var(--gold);-webkit-user-select:text;user-select:text}
 .profile-form input:focus,.profile-form select:focus,.natal-form input:focus,.dream-entry textarea:focus,.dream-date-field input:focus,.dream-editor input:focus,.dream-editor textarea:focus{
