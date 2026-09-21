@@ -8,11 +8,11 @@ document.addEventListener('touchmove',event=>{if(event.touches.length>1)event.pr
 ['gesturestart','gesturechange','gestureend'].forEach(name=>document.addEventListener(name,event=>event.preventDefault(),{passive:false}));
 const visualViewport=window.visualViewport;let stableViewportHeight=Math.max(window.innerHeight,visualViewport?.height||0);
 function inputIsActive(){return /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName||'')}
-const keyboardDismiss=$('#keyboard-dismiss');
-function syncKeyboardLayout(){const focused=inputIsActive(),visibleHeight=visualViewport?.height||window.innerHeight,offsetTop=visualViewport?.offsetTop||0;if(!focused)stableViewportHeight=Math.max(stableViewportHeight,window.innerHeight,visibleHeight);const keyboardHeight=Math.max(0,stableViewportHeight-visibleHeight-offsetTop),open=focused;document.documentElement.classList.toggle('keyboard-open',open);document.documentElement.style.setProperty('--keyboard-shift',`${keyboardHeight>120?keyboardHeight+24:24}px`);keyboardDismiss.hidden=!open}
+function syncKeyboardLayout(){const focused=inputIsActive(),visibleHeight=visualViewport?.height||window.innerHeight,offsetTop=visualViewport?.offsetTop||0;if(!focused)stableViewportHeight=Math.max(stableViewportHeight,window.innerHeight,visibleHeight);const keyboardHeight=Math.max(0,stableViewportHeight-visibleHeight-offsetTop),open=focused;document.documentElement.classList.toggle('keyboard-open',open);document.documentElement.style.setProperty('--keyboard-shift',`${keyboardHeight>120?keyboardHeight+24:24}px`)}
 visualViewport?.addEventListener('resize',syncKeyboardLayout);visualViewport?.addEventListener('scroll',syncKeyboardLayout);window.addEventListener('resize',syncKeyboardLayout);document.addEventListener('focusin',()=>requestAnimationFrame(syncKeyboardLayout));document.addEventListener('focusout',()=>setTimeout(syncKeyboardLayout,120));
-keyboardDismiss.onclick=()=>document.activeElement?.blur();
-document.addEventListener('pointerdown',event=>{if(!inputIsActive()||event.target.closest('input,textarea,select,.keyboard-dismiss'))return;document.activeElement?.blur()});
+document.addEventListener('focusin',event=>{if(event.target instanceof HTMLInputElement&&!['date','time','checkbox','radio','range','file'].includes(event.target.type))event.target.enterKeyHint='done'});
+document.addEventListener('keydown',event=>{if(event.key==='Enter'&&event.target instanceof HTMLInputElement){event.preventDefault();event.target.blur()}});
+document.addEventListener('pointerdown',event=>{if(!inputIsActive()||event.target.closest('input,textarea,select'))return;document.activeElement?.blur()});
 function applyDateLimits(scope=document){$$('input[type="date"]',scope).forEach(input=>{input.max=todayISO;if(input.value>todayISO)input.value=''})}
 let currentView='today';const viewHistory=[];
 function showView(id,remember=true){if(id===currentView)return;if(remember)viewHistory.push(currentView);currentView=id;$$('.view').forEach(v=>v.classList.toggle('active',v.id===id));$$('.bottom-nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===id));scrollTo({top:0,behavior:'smooth'})}
