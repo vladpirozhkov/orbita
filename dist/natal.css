@@ -549,3 +549,12 @@ dialog.dream-view-modal{overflow:hidden;overscroll-behavior:none}
 html[data-theme="dark"] .dream-date-field input,html[data-theme="dark"] .dream-entry textarea{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.1);color:var(--ink)}
 html[data-theme="dark"] .dream-pagination button,html[data-theme="dark"] .dream-actions button,html[data-theme="dark"] .secondary-btn,html[data-theme="dark"] .dream-editor input,html[data-theme="dark"] .dream-editor textarea{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12);color:var(--ink)}
 @media(max-width:370px){.greeting span,.greeting h1{font-size:20px!important}.bottom-nav button small{font-size:11px}.bottom-nav .nav-icon{width:23px;height:23px}}
+
+/* Telegram Mini App viewport and safe areas */
+html.telegram-mini-app body{min-height:var(--tg-viewport-stable-height,100vh)}
+html.telegram-mini-app .app-shell{
+  min-height:var(--tg-viewport-stable-height,100vh);
+  padding-top:max(0px,var(--tg-content-safe-area-inset-top,0px));
+  padding-bottom:calc(104px + var(--tg-content-safe-area-inset-bottom,0px));
+}
+html.telegram-mini-app .bottom-nav{bottom:calc(12px + var(--tg-content-safe-area-inset-bottom,0px))}
