@@ -2,13 +2,15 @@ const $=(s,c=document)=>c.querySelector(s);const $$=(s,c=document)=>[...c.queryS
 const months=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
 const days=['воскресенье','понедельник','вторник','среда','четверг','пятница','суббота'];
 const now=new Date();const todayISO=new Date(Date.now()-now.getTimezoneOffset()*60000).toISOString().slice(0,10);$('#current-date').textContent=`${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]}`;
+const telegramApp=window.Telegram?.WebApp||null;
+if(telegramApp){document.documentElement.classList.add('telegram-mini-app');telegramApp.ready();telegramApp.expand()}
 function applyDateLimits(scope=document){$$('input[type="date"]',scope).forEach(input=>{input.max=todayISO;if(input.value>todayISO)input.value=''})}
 let currentView='today';const viewHistory=[];
 function showView(id,remember=true){if(id===currentView)return;if(remember)viewHistory.push(currentView);currentView=id;$$('.view').forEach(v=>v.classList.toggle('active',v.id===id));$$('.bottom-nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===id));scrollTo({top:0,behavior:'smooth'})}
 function goBack(){const previous=viewHistory.pop()||'today';showView(previous,false)}
 $$('[data-view]').forEach(b=>b.onclick=()=>showView(b.dataset.view));$$('[data-back]').forEach(b=>b.onclick=goBack);
 const modal=$('#modal'),content=$('#modal-content');$('.modal-close').onclick=()=>modal.close();modal.addEventListener('close',()=>modal.classList.remove('dream-view-modal'));
-function setTheme(theme){document.documentElement.dataset.theme=theme;localStorage.setItem('orbita-theme',theme);document.querySelector('meta[name="theme-color"]').content=theme==='dark'?'#090817':'#E7E8D6'}
+function setTheme(theme){const dark=theme==='dark',color=dark?'#090817':'#E7E8D6';document.documentElement.dataset.theme=theme;localStorage.setItem('orbita-theme',theme);document.querySelector('meta[name="theme-color"]').content=color;if(telegramApp){try{telegramApp.setHeaderColor(color);telegramApp.setBackgroundColor(color);telegramApp.setBottomBarColor?.(color)}catch{}}}
 function openMenu(){const dark=document.documentElement.dataset.theme==='dark';content.innerHTML=`<div class="app-menu"><div class="eyebrow">МЕНЮ</div><h2>Орбита</h2><button data-menu-view="profile">Профиль <span>→</span></button><button data-theme-toggle>${dark?'Светлая':'Тёмная'} тема <span>${dark?'☼':'☾'}</span></button></div>`;modal.showModal();$$('[data-menu-view]',content).forEach(button=>button.onclick=()=>{modal.close();showView(button.dataset.menuView)});$('[data-theme-toggle]',content).onclick=()=>{setTheme(dark?'light':'dark');modal.close();toast(dark?'Светлая тема включена':'Тёмная тема включена')}}
 $('[data-action="menu"]').onclick=openMenu;
 setTheme(document.documentElement.dataset.theme||'light');
@@ -74,7 +76,7 @@ $('[data-modal="forecast"]').onclick=async()=>{const profile=readProfile();if(!p
 $$('[data-sphere]').forEach(button=>button.onclick=async()=>{const profile=readProfile();if(!profileComplete(profile)){showView('profile');return}if(!currentChart)currentChart=await loadChart(profile);renderSphere(button.dataset.sphere)});
 const profileForm=$('#profile-form'),profileQuery=$('#profile-place-query');bindPlaceSearch(profileForm,profileQuery,$('#profile-place-results'),$('#profile-place-state'));
 profileForm.onsubmit=e=>{e.preventDefault();const d=Object.fromEntries(new FormData(e.currentTarget));if(d.birthdate>todayISO){toast('Дата рождения не может быть в будущем');return}if(!profileComplete(d)){toast('Выбери место из списка');return}localStorage.setItem('orbita-profile',JSON.stringify(d));currentForecastKey='';currentChart=null;$('#today-title').textContent=d.name||'друг';viewHistory.length=0;showView('today',false);toast('Профиль сохранён');refreshToday(true)};
-const saved=readProfile();if(saved){Object.entries(saved).forEach(([k,v])=>{const el=profileForm.elements[k];if(el)el.value=v});$('#today-title').textContent=saved.name||'друг';if(saved.timezone)$('#profile-place-state').textContent=`Часовой пояс: ${saved.timezone}`}
+const saved=readProfile();if(saved){Object.entries(saved).forEach(([k,v])=>{const el=profileForm.elements[k];if(el)el.value=v});$('#today-title').textContent=saved.name||'друг';if(saved.timezone)$('#profile-place-state').textContent=`Часовой пояс: ${saved.timezone}`}else{const telegramName=telegramApp?.initDataUnsafe?.user?.first_name?.trim();if(telegramName){profileForm.elements.name.value=telegramName;$('#today-title').textContent=telegramName}}
 applyDateLimits(profileForm);
 refreshToday();setInterval(()=>refreshToday(),60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshToday()});
 const dreamsKey='orbita-dreams:v1';
