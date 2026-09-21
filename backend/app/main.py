@@ -216,9 +216,11 @@ async def _release_dream_analysis(app_day: str, client_day: date, user_hash: str
 
 @app.post("/v1/dream-analysis")
 async def dream_analysis(request: DreamAnalysisRequest) -> dict:
+    if request.dream_date > request.client_day:
+        raise HTTPException(status_code=422, detail="Дата сна не может быть в будущем")
     account_id = os.getenv("CLOUDFLARE_ACCOUNT_ID", "").strip()
     api_token = os.getenv("CLOUDFLARE_AI_API_TOKEN", "").strip()
-    model = os.getenv("DREAM_ANALYSIS_MODEL", "@cf/meta/llama-3.1-8b-instruct").strip()
+    model = os.getenv("DREAM_ANALYSIS_MODEL", "@cf/qwen/qwen3-30b-a3b-fp8").strip()
     if not account_id or not api_token:
         raise HTTPException(status_code=503, detail="AI-анализ ещё не подключён")
 
