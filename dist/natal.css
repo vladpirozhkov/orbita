@@ -516,6 +516,7 @@ html[data-theme="dark"] .modal-close{
 .dream-date-field{display:grid;gap:7px}
 .dream-date-field label,.dream-text-field>span{color:var(--muted);font-size:14px;font-weight:600}
 .dream-text-field{display:grid;gap:7px}
+.dream-text-field>small,.dream-editor label>small{justify-self:end;color:var(--muted);font-size:12px;font-weight:600}
 .dream-date-field input,.dream-entry textarea{width:100%;min-width:0;border:1px solid rgba(105,109,92,.18);border-radius:14px;background:rgba(255,255,255,.55);color:var(--ink);outline:none}
 .dream-date-field input{min-height:50px;padding:12px 14px;font-size:16px;text-align:left}
 .dream-entry textarea{height:150px;padding:14px;resize:vertical}
@@ -544,6 +545,7 @@ dialog.dream-view-modal{overflow:hidden;overscroll-behavior:none}
 .dream-editor input,.dream-editor textarea{width:100%;min-width:0;border:1px solid rgba(105,109,92,.18);border-radius:14px;background:rgba(255,255,255,.5);color:var(--ink);outline:none;padding:13px 14px;font-size:16px}
 .dream-editor textarea{min-height:190px;resize:vertical;line-height:1.55}
 .dream-editor-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:5px}
+.dream-editor-actions.single{grid-template-columns:1fr}
 .dream-delete-confirm h2{margin-top:12px}
 .dream-ai-button{width:100%;min-height:50px;margin-top:20px;border:0;border-radius:15px;background:var(--gold);color:#fff;font:inherit;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px}
 .dream-ai-button.secondary-btn{background:rgba(255,255,255,.38);color:var(--ink);border:1px solid rgba(105,109,92,.2)}
@@ -574,6 +576,9 @@ dialog.dream-view-modal{overflow:hidden;overscroll-behavior:none}
 .dream-takeaway small{color:var(--gold);font-size:10px;font-weight:800;letter-spacing:.08em}
 .dream-takeaway p{margin:5px 0 0!important;color:var(--ink)!important;font-size:14px!important;line-height:1.55!important}
 .dream-ai-note{margin:0!important;color:var(--muted)!important;font-size:11px!important;line-height:1.45!important}
+.dream-ai-limit{display:grid;gap:4px;margin-top:20px;padding:14px 15px;border:1px solid var(--line);border-radius:15px;background:rgba(142,147,117,.12)}
+.dream-ai-limit strong{color:var(--ink);font-size:14px}
+.dream-ai-limit span{color:var(--muted);font-size:12px}
 .dream-ai-loading{text-align:center}
 .ai-orbit{width:76px;height:76px;margin:18px auto;display:grid;place-items:center;border:1px solid var(--line);border-radius:50%;animation:aiPulse 1.8s ease-in-out infinite}
 .ai-orbit span{font-size:30px;color:var(--gold)}
