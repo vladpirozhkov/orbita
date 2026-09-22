@@ -65,6 +65,30 @@ HOUSE_TEXT = {
     11: "друзья, сообщества и образ будущего", 12: "уединение, бессознательное и восстановление",
 }
 
+MOON_SIGN_DAY_TEXT = {
+    "Aries": "реагировать быстрее и прямее, чем обычно",
+    "Taurus": "искать устойчивость, понятный ритм и телесный комфорт",
+    "Gemini": "чаще переключаться между разговорами, идеями и новостями",
+    "Cancer": "острее замечать потребность в близости и безопасной обстановке",
+    "Leo": "смелее показывать чувства и ждать заметного отклика",
+    "Virgo": "наводить порядок и внимательнее видеть несовершенные детали",
+    "Libra": "искать согласие и учитывать реакцию другого человека",
+    "Scorpio": "переживать глубже и внимательнее считывать скрытые мотивы",
+    "Sagittarius": "стремиться к движению, смыслу и более широкому взгляду",
+    "Capricorn": "собираться вокруг обязанностей и конкретного результата",
+    "Aquarius": "нуждаться в свободе выбора и свежем способе решить задачу",
+    "Pisces": "тоньше воспринимать атмосферу, намёки и собственную усталость",
+}
+
+MOON_HOUSE_FOCUS = {
+    1: "самочувствие и личная инициатива", 2: "деньги и чувство опоры",
+    3: "разговоры и текущие дела", 4: "дом и эмоциональная безопасность",
+    5: "творчество, симпатия и удовольствие", 6: "режим, работа и забота о себе",
+    7: "отношения и договорённости", 8: "доверие и общие ресурсы",
+    9: "обучение, планы и новые впечатления", 10: "цели и профессиональная видимость",
+    11: "друзья, команды и планы на будущее", 12: "отдых, завершение и внутреннее восстановление",
+}
+
 ASPECT_TONE = {
     "conjunction": (0, "соединение"),
     "sextile": (1, "секстиль"),
@@ -306,7 +330,31 @@ def calculate_daily_forecast(chart: dict, forecast_date: datetime) -> dict:
                     })
                     break
     hits.sort(key=lambda row: row["orb"])
-    selected = hits[:5]
+    lunar_hits = [row for row in hits if row["transit"] == "Moon"]
+    # A daily forecast must not be led for several days by the same slow transit.
+    # Keep the most exact lunar contact in view, then fill the list by precision.
+    lead_lunar = lunar_hits[0] if lunar_hits else None
+    selected = ([lead_lunar] if lead_lunar else []) + [
+        row for row in hits if row is not lead_lunar
+    ][:4 if lead_lunar else 5]
+
+    house_cusps = tuple(row["longitude"] for row in chart["houses"])
+    transit_moon = transits["Moon"]
+    moon_house = _house_for(transit_moon.longitude, house_cusps)
+    moon_sign_ru = SIGN_RU[transit_moon.sign]
+    moon_focus = MOON_HOUSE_FOCUS[moon_house]
+    daily_context = {
+        "moon_sign": transit_moon.sign,
+        "moon_sign_ru": moon_sign_ru,
+        "moon_degree": round(transit_moon.degree_in_sign, 1),
+        "moon_house": moon_house,
+        "focus": moon_focus,
+        "summary": (
+            f"Луна сегодня проходит {transit_moon.degree_in_sign:.1f}° знака {moon_sign_ru} "
+            f"и активирует {moon_house} дом твоей натальной карты. Поэтому заметнее тема: {moon_focus}. "
+            f"Эмоциональный ритм может побуждать {MOON_SIGN_DAY_TEXT[transit_moon.sign]}."
+        ),
+    }
     scores = {"relationships": 6, "work": 6, "energy": 6}
     for row in selected:
         impact = row["tone"]
@@ -316,6 +364,12 @@ def calculate_daily_forecast(chart: dict, forecast_date: datetime) -> dict:
             scores["work"] += impact
         if row["transit"] in {"Sun", "Mars"} or row["natal"] in {"Sun", "Mars"}:
             scores["energy"] += impact
+    if moon_house in {5, 7, 8}:
+        scores["relationships"] += 1
+    if moon_house in {2, 3, 6, 10}:
+        scores["work"] += 1
+    if moon_house in {1, 5, 9, 11}:
+        scores["energy"] += 1
     scores = {key: max(1, min(10, value)) for key, value in scores.items()}
     if selected:
         supportive_count = sum(row["tone"] > 0 for row in selected)
@@ -355,7 +409,7 @@ def calculate_daily_forecast(chart: dict, forecast_date: datetime) -> dict:
         return {"score": score, "level": level, "summary": summary, "favorable": favorable, "avoid": avoid}
 
     spheres = {key: sphere_copy(key, score) for key, score in scores.items()}
-    top = selected[0] if selected else None
+    top = lead_lunar or (selected[0] if selected else None)
     if top:
         aspect_effect = {
             "conjunction": "Темы двух планет усиливают друг друга и становятся заметнее.",
@@ -367,7 +421,7 @@ def calculate_daily_forecast(chart: dict, forecast_date: datetime) -> dict:
         practical = "Используйте паузу перед важной реакцией и выбирайте конкретный следующий шаг." if top["tone"] < 0 else "Зафиксируйте возможность конкретным действием, пока поддерживающий аспект точен."
         key_transit = {
             "title": top["text"],
-            "explanation": f"Сегодня связаны темы «{TRANSIT_THEME[top['transit']]}» и «{NATAL_THEME[top['natal']]}». {aspect_effect}",
+            "explanation": f"Сегодня взаимодействуют {TRANSIT_THEME[top['transit']]} и {NATAL_THEME[top['natal']]}. {aspect_effect}",
             "advice": practical,
             "orb": top["orb"],
         }
@@ -383,7 +437,7 @@ def calculate_daily_forecast(chart: dict, forecast_date: datetime) -> dict:
     weak_key = min(scores, key=scores.get)
     sphere_names = {"relationships": "отношений", "work": "работы", "energy": "энергии"}
     overview = {
-        "what_to_expect": summary,
+        "what_to_expect": f"{daily_context['summary']} {summary}",
         "favorable": f"Лучше всего поддержана сфера {sphere_names[best_key]}: {spheres[best_key]['favorable']}.",
         "avoid": f"Больше внимания требует сфера {sphere_names[weak_key]}. Лучше избегать: {spheres[weak_key]['avoid']}.",
     }
@@ -395,6 +449,7 @@ def calculate_daily_forecast(chart: dict, forecast_date: datetime) -> dict:
         "spheres": spheres,
         "overview": overview,
         "key_transit": key_transit,
+        "daily_context": daily_context,
         "transits": selected,
-        "method": "Swiss Ephemeris transits at 12:00 UTC, 2.5° orb",
+        "method": "Swiss Ephemeris transits at 12:00 UTC; lunar house and major aspects within a 2.5° orb",
     }
