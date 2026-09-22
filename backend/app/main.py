@@ -4,7 +4,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 """
 
 import os
-from datetime import datetime
+from datetime import date, datetime, time
 from functools import lru_cache
 from zoneinfo import ZoneInfo
 
@@ -100,7 +100,7 @@ async def search_places(q: str) -> list[dict]:
 
 
 @app.post("/v1/natal-chart")
-def natal_chart(request: NatalChartRequest) -> dict:
+def natal_chart(request: NatalChartRequest, forecast_date: date | None = None) -> dict:
     try:
         chart = calculate_natal_chart(
             birth_datetime=request.birth_datetime,
@@ -110,7 +110,9 @@ def natal_chart(request: NatalChartRequest) -> dict:
             house_system=request.house_system,
         )
         chart["interpretation"] = interpret_natal_chart(chart)
-        chart["daily_forecast"] = calculate_daily_forecast(chart, datetime.now(ZoneInfo(request.timezone)))
+        zone = ZoneInfo(request.timezone)
+        forecast_moment = datetime.combine(forecast_date, time(hour=12), tzinfo=zone) if forecast_date else datetime.now(zone)
+        chart["daily_forecast"] = calculate_daily_forecast(chart, forecast_moment)
         return chart
     except (ValueError, KeyError) as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
