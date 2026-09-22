@@ -6,6 +6,8 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 import os
 from datetime import date, datetime, time
 from functools import lru_cache
+from typing import Any
+from uuid import UUID
 from zoneinfo import ZoneInfo
 
 import httpx
@@ -15,6 +17,13 @@ from pydantic import BaseModel, Field
 from timezonefinder import TimezoneFinder
 
 from .astrology import calculate_daily_forecast, calculate_natal_chart, interpret_natal_chart
+from .analytics import (
+    ALLOWED_EVENT_NAMES,
+    AnalyticsStorageError,
+    InvalidTelegramData,
+    store_analytics_batch,
+    validate_telegram_init_data,
+)
 
 app = FastAPI(
     title="Orbita API",
@@ -51,9 +60,55 @@ class NatalChartRequest(BaseModel):
     house_system: str = Field(default="P", min_length=1, max_length=1)
 
 
+class AnalyticsEvent(BaseModel):
+    event_id: UUID
+    name: str = Field(min_length=1, max_length=48)
+    session_id: UUID
+    occurred_at: datetime | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class AnalyticsBatchRequest(BaseModel):
+    init_data: str = Field(min_length=1, max_length=8192)
+    platform: str | None = Field(default=None, max_length=32)
+    app_version: str | None = Field(default=None, max_length=32)
+    events: list[AnalyticsEvent] = Field(min_length=1, max_length=20)
+
+
 @app.get("/health")
 def health() -> dict:
     return {"status": "ok"}
+
+
+@app.post("/v1/analytics/events", status_code=202)
+async def analytics_events(request: AnalyticsBatchRequest) -> dict:
+    bot_token = os.getenv("ORBITA_BOT_TOKEN", "")
+    supabase_url = os.getenv("SUPABASE_URL", "")
+    supabase_secret_key = os.getenv("SUPABASE_SECRET_KEY", "")
+    if not bot_token or not supabase_url or not supabase_secret_key:
+        raise HTTPException(status_code=503, detail="Analytics is not configured")
+    invalid_names = sorted({event.name for event in request.events} - ALLOWED_EVENT_NAMES)
+    if invalid_names:
+        raise HTTPException(status_code=422, detail="Unsupported analytics event")
+    try:
+        identity = validate_telegram_init_data(
+            request.init_data,
+            bot_token,
+            max_age_seconds=int(os.getenv("TELEGRAM_INIT_DATA_MAX_AGE_SECONDS", "86400")),
+        )
+        stored = await store_analytics_batch(
+            supabase_url=supabase_url,
+            supabase_secret_key=supabase_secret_key,
+            identity=identity,
+            events=[event.model_dump(mode="json") for event in request.events],
+            platform=request.platform,
+            app_version=request.app_version,
+        )
+    except InvalidTelegramData as exc:
+        raise HTTPException(status_code=401, detail=str(exc)) from exc
+    except (AnalyticsStorageError, ValueError) as exc:
+        raise HTTPException(status_code=502, detail="Analytics is temporarily unavailable") from exc
+    return {"accepted": stored}
 
 
 @lru_cache(maxsize=256)

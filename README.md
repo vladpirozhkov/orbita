@@ -58,6 +58,45 @@ docker run --rm -p 8000:8000 --env-file .env orbita-api
 PYTHONPATH=backend pytest backend/tests
 ```
 
+## Аналитика пользователей
+
+Mini App отправляет на backend только события из фиксированного списка. Backend
+проверяет подпись `Telegram.WebApp.initData`, преобразует Telegram ID в
+необратимый псевдоним и записывает события в Supabase. Даты рождения, места,
+имена, тексты снов и содержимое прогнозов не передаются.
+
+Для Render-сервиса API задайте переменные:
+
+```text
+ORBITA_BOT_TOKEN=<токен @orbita_natal_bot>
+SUPABASE_URL=https://<project-ref>.supabase.co
+SUPABASE_SECRET_KEY=sb_secret_...
+TELEGRAM_INIT_DATA_MAX_AGE_SECONDS=86400
+```
+
+Секретный ключ Supabase и токен бота должны находиться только в переменных
+backend-сервиса. Их нельзя добавлять в frontend, GitHub или `dist/config.js`.
+
+Сводка DAU, WAU, MAU, новых пользователей, сессий и запусков доступна в
+Supabase SQL Editor:
+
+```sql
+select *
+from public.analytics_daily_metrics
+order by metric_date desc
+limit 30;
+```
+
+События по функциям приложения:
+
+```sql
+select event_name, count(*) as events, count(distinct user_key) as users
+from public.analytics_events
+where occurred_at >= now() - interval '30 days'
+group by event_name
+order by users desc, events desc;
+```
+
 ## Лицензия
 
 Проект распространяется под AGPL-3.0-or-later. Приложение использует
