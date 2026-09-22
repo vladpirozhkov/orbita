@@ -52,3 +52,24 @@ def test_interpretation_and_daily_forecast_are_grounded_in_chart():
     assert forecast["overview"]["favorable"]
     assert forecast["overview"]["avoid"]
     assert forecast["key_transit"]["explanation"]
+    assert forecast["daily_context"]["moon_sign"] in {
+        "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
+        "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces",
+    }
+    assert 1 <= forecast["daily_context"]["moon_house"] <= 12
+    assert "Луна сегодня проходит" in forecast["daily_context"]["summary"]
+
+
+def test_adjacent_days_have_distinct_lunar_context():
+    chart = calculate_natal_chart(
+        datetime(1990, 1, 1, 12, 0),
+        "Europe/Paris",
+        48.8566,
+        2.3522,
+    )
+    first = calculate_daily_forecast(chart, datetime(2026, 9, 21, 12, 0))
+    second = calculate_daily_forecast(chart, datetime(2026, 9, 22, 12, 0))
+
+    assert first["date"] != second["date"]
+    assert first["daily_context"]["moon_degree"] != second["daily_context"]["moon_degree"]
+    assert first["daily_context"]["summary"] != second["daily_context"]["summary"]
