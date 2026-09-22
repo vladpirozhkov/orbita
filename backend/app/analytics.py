@@ -118,6 +118,8 @@ def sanitize_metadata(metadata: dict[str, Any]) -> dict[str, str | int | float |
     for key, value in metadata.items():
         if key not in ALLOWED_METADATA_KEYS or not isinstance(value, (str, int, float, bool, type(None))):
             continue
+        if key == "has_profile" and not isinstance(value, bool):
+            continue
         sanitized[key] = value[:80] if isinstance(value, str) else value
     return sanitized
 
