@@ -57,7 +57,7 @@ def test_interpretation_and_daily_forecast_are_grounded_in_chart():
         "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces",
     }
     assert 1 <= forecast["daily_context"]["moon_house"] <= 12
-    assert "Луна сегодня проходит" in forecast["daily_context"]["summary"]
+    assert "Сегодня в центре внимания" in forecast["daily_context"]["summary"]
 
 
 def test_adjacent_days_have_distinct_lunar_context():
