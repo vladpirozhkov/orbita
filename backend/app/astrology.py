@@ -350,9 +350,9 @@ def calculate_daily_forecast(chart: dict, forecast_date: datetime) -> dict:
         "moon_house": moon_house,
         "focus": moon_focus,
         "summary": (
-            f"Луна сегодня проходит {transit_moon.degree_in_sign:.1f}° знака {moon_sign_ru} "
-            f"и активирует {moon_house} дом твоей натальной карты. Поэтому заметнее тема: {moon_focus}. "
-            f"Эмоциональный ритм может побуждать {MOON_SIGN_DAY_TEXT[transit_moon.sign]}."
+            f"Сегодня в центре внимания — {moon_focus}. "
+            f"Может быть особенно естественно {MOON_SIGN_DAY_TEXT[transit_moon.sign]}. "
+            "Перед важным решением проверь, соответствует ли первая реакция реальной ситуации."
         ),
     }
     scores = {"relationships": 6, "work": 6, "energy": 6}
@@ -424,6 +424,7 @@ def calculate_daily_forecast(chart: dict, forecast_date: datetime) -> dict:
             "explanation": f"Сегодня взаимодействуют {TRANSIT_THEME[top['transit']]} и {NATAL_THEME[top['natal']]}. {aspect_effect}",
             "advice": practical,
             "orb": top["orb"],
+            "tone": top["tone"],
         }
     else:
         key_transit = {
@@ -431,6 +432,7 @@ def calculate_daily_forecast(chart: dict, forecast_date: datetime) -> dict:
             "explanation": "Фон дня не требует резких изменений и позволяет опираться на привычный ритм.",
             "advice": "Сосредоточьтесь на восстановлении и завершении уже начатого.",
             "orb": None,
+            "tone": 0,
         }
 
     best_key = max(scores, key=scores.get)
