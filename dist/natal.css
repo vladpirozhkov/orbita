@@ -46,6 +46,8 @@
 .forecast-detail strong{display:block;color:var(--gold);margin-bottom:5px}
 .sphere-popup h2{margin-bottom:8px}
 .sphere-popup .sphere-score{font:400 44px Prata;color:var(--gold);margin:8px 0 14px}
+.sphere-popup .sphere-reading{margin-top:20px}
+.sphere-popup .sphere-reading p{margin:0;color:var(--muted);font-size:14px;line-height:1.65}
 .sphere-popup .do-dont{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:18px 0}
 .sphere-popup .do-dont div{padding:13px;border:1px solid var(--line);border-radius:13px;font-size:12px;line-height:1.45}
 .sphere-popup .do-dont strong{display:block;color:var(--gold);margin-bottom:5px}

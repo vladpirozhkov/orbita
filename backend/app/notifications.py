@@ -131,6 +131,7 @@ async def send_test_notification(
                 json={
                     "chat_id": row["telegram_chat_id"],
                     "text": _notification_text(forecast),
+                    "parse_mode": "HTML",
                     "reply_markup": {
                         "inline_keyboard": [[{
                             "text": "Открыть полный прогноз",
@@ -225,59 +226,20 @@ async def _valid_cron_token(
     return bool(expected) and hmac.compare_digest(actual, expected)
 
 
-def _notification_text(forecast: dict[str, Any]) -> str:
-    scores = forecast["scores"]
-    best_key = max(scores, key=scores.get)
-    weak_key = min(scores, key=scores.get)
-    best_level = forecast["spheres"][best_key]["level"]
-    weak_level = forecast["spheres"][weak_key]["level"]
-    actions = {
-        "relationships": {
-            "high": "открыто поговорить с близким человеком и сделать шаг навстречу",
-            "mid": "спокойно уточнять ожидания и смотреть на реальные поступки",
-            "low": "бережно обозначать свои чувства и брать паузу перед реакцией",
-        },
-        "work": {
-            "high": "выбрать важную задачу и довести её до заметного результата",
-            "mid": "сосредоточиться на понятных задачах, проверить детали и навести порядок",
-            "low": "оставить запас времени и внимательно перепроверять договорённости",
-        },
-        "energy": {
-            "high": "направить силы в активное дело, которое давно хотелось начать",
-            "mid": "сохранить ровный темп и распределить нагрузку без спешки",
-            "low": "снизить нагрузку и дать себе время на восстановление",
-        },
-    }
-    cautions = {
-        "relationships": {
-            "high": "торопить сближение или принимать красивые обещания за готовый результат",
-            "mid": "додумывать мотивы другого человека вместо прямого разговора",
-            "low": "ставить ультиматумы и принимать решения на пике эмоций",
-        },
-        "work": {
-            "high": "брать на себя больше, чем получится качественно выполнить",
-            "mid": "распыляться между задачами и постоянно переключать внимание",
-            "low": "вступать в резкие споры и обещать результат без запаса времени",
-        },
-        "energy": {
-            "high": "перегружаться и игнорировать первые признаки усталости",
-            "mid": "компенсировать усталость стимуляторами и поздней активностью",
-            "low": "бороться с усталостью через силу и требовать от себя максимума",
-        },
-    }
-    focus = forecast["daily_context"]["focus"]
+def _daily_orientation(forecast: dict[str, Any]) -> str:
     tone = int(forecast.get("key_transit", {}).get("tone", 0))
     if tone > 0:
-        hook = "обстоятельства могут помочь продвинуться вперёд, если закрепить возможность конкретным действием"
-    elif tone < 0:
-        hook = "напряжение может подтолкнуть к поспешной реакции, поэтому сначала проверь факты"
-    else:
-        hook = "спокойный и последовательный ритм поможет сохранить ясность и не растратить силы"
+        return "Тебе сегодня стоит заметить удачную возможность и закрепить её конкретным действием."
+    if tone < 0:
+        return "Тебе сегодня лучше не спешить с ответами и окончательными решениями: реакции могут быть острее обычного."
+    return "Тебе сегодня лучше сохранять ровный темп и не требовать от себя резкого прорыва."
+
+
+def _notification_text(forecast: dict[str, Any]) -> str:
+    orientation = _daily_orientation(forecast)
     return (
-        f"Тебе сегодня нужно {actions[best_key][best_level]}. "
-        f"В центре дня — {focus}; {hook}. "
-        f"Тебе не нужно {cautions[weak_key][weak_level]}.\n\n"
-        "Зайди в приложение, чтобы узнать полный прогноз для тебя на сегодня!"
+        f"Привет! <b>{orientation}</b> Уже подготовили твой подробный прогноз на сегодня ✨\n\n"
+        "Зайди в приложение, чтобы узнать, чего ожидать от сегодняшнего дня!"
     )
 
 
@@ -338,6 +300,7 @@ async def dispatch_due_notifications(
                 payload = {
                     "chat_id": row["telegram_chat_id"],
                     "text": _notification_text(forecast),
+                    "parse_mode": "HTML",
                     "reply_markup": {
                         "inline_keyboard": [[{
                             "text": "Открыть полный прогноз",
