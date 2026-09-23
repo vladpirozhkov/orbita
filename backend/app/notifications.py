@@ -6,7 +6,7 @@ import asyncio
 import hashlib
 import hmac
 import os
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from typing import Any
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
@@ -18,6 +18,10 @@ from .astrology import calculate_daily_forecast, calculate_natal_chart
 
 class NotificationStorageError(RuntimeError):
     """Raised when notification settings cannot be read or persisted."""
+
+
+class NotificationTestCooldownError(RuntimeError):
+    """Raised when an admin requests test delivery too frequently."""
 
 
 def _supabase_headers(secret_key: str, *, prefer: str | None = None) -> dict[str, str]:
@@ -35,24 +39,118 @@ async def notification_status(
     supabase_secret_key: str,
     user_key: str,
 ) -> dict[str, Any]:
-    url = (
+    subscription_url = (
         supabase_url.rstrip("/")
         + "/rest/v1/notification_subscriptions"
         + f"?select=enabled,preferred_hour&user_key=eq.{user_key}&limit=1"
     )
+    admin_url = (
+        supabase_url.rstrip("/")
+        + "/rest/v1/notification_test_admins"
+        + f"?select=user_key&user_key=eq.{user_key}&limit=1"
+    )
     try:
         async with httpx.AsyncClient(timeout=6.0) as client:
-            response = await client.get(url, headers=_supabase_headers(supabase_secret_key))
-            response.raise_for_status()
-            rows = response.json()
+            subscription_response, admin_response = await asyncio.gather(
+                client.get(subscription_url, headers=_supabase_headers(supabase_secret_key)),
+                client.get(admin_url, headers=_supabase_headers(supabase_secret_key)),
+            )
+            subscription_response.raise_for_status()
+            admin_response.raise_for_status()
+            rows = subscription_response.json()
+            is_test_admin = bool(admin_response.json())
     except (httpx.HTTPError, ValueError) as exc:
         raise NotificationStorageError("Notification settings are unavailable") from exc
     if not rows:
-        return {"enabled": False, "preferred_hour": 9}
+        return {"enabled": False, "preferred_hour": 9, "can_test": is_test_admin}
     return {
         "enabled": bool(rows[0].get("enabled")),
         "preferred_hour": int(rows[0].get("preferred_hour", 9)),
+        "can_test": is_test_admin,
     }
+
+
+async def send_test_notification(
+    *,
+    supabase_url: str,
+    supabase_secret_key: str,
+    user_key: str,
+    bot_token: str,
+    web_app_url: str,
+) -> dict[str, bool]:
+    """Immediately send an allowlisted admin's forecast without consuming daily delivery."""
+
+    root = supabase_url.rstrip("/") + "/rest/v1"
+    headers = _supabase_headers(supabase_secret_key)
+    admin_url = (
+        root
+        + "/notification_test_admins"
+        + f"?select=user_key,last_test_sent_at&user_key=eq.{user_key}&limit=1"
+    )
+    subscription_url = (
+        root
+        + "/notification_subscriptions"
+        + "?select=user_key,telegram_chat_id,timezone,birth_date,birth_time,latitude,longitude"
+        + f"&user_key=eq.{user_key}&enabled=eq.true&limit=1"
+    )
+    try:
+        async with httpx.AsyncClient(timeout=12.0) as client:
+            admin_response, subscription_response = await asyncio.gather(
+                client.get(admin_url, headers=headers),
+                client.get(subscription_url, headers=headers),
+            )
+            admin_response.raise_for_status()
+            subscription_response.raise_for_status()
+            admins = admin_response.json()
+            subscriptions = subscription_response.json()
+            if not admins:
+                raise PermissionError("Test delivery is not allowed")
+            if not subscriptions:
+                raise NotificationStorageError("Enable daily forecasts before testing")
+
+            now_utc = datetime.now(tz=ZoneInfo("UTC"))
+            last_sent_raw = admins[0].get("last_test_sent_at")
+            if last_sent_raw:
+                last_sent = datetime.fromisoformat(str(last_sent_raw).replace("Z", "+00:00"))
+                if now_utc - last_sent < timedelta(seconds=30):
+                    raise NotificationTestCooldownError("Wait before sending another test")
+
+            row = subscriptions[0]
+            local_now = now_utc.astimezone(ZoneInfo(row["timezone"]))
+            birth_datetime = datetime.fromisoformat(f"{row['birth_date']}T{row['birth_time']}")
+            chart = calculate_natal_chart(
+                birth_datetime=birth_datetime,
+                timezone_name=row["timezone"],
+                latitude=float(row["latitude"]),
+                longitude=float(row["longitude"]),
+                house_system="P",
+            )
+            forecast = calculate_daily_forecast(chart, local_now)
+            sent = await client.post(
+                f"https://api.telegram.org/bot{bot_token}/sendMessage",
+                json={
+                    "chat_id": row["telegram_chat_id"],
+                    "text": _notification_text(forecast),
+                    "reply_markup": {
+                        "inline_keyboard": [[{
+                            "text": "Открыть полный прогноз",
+                            "web_app": {"url": web_app_url},
+                        }]],
+                    },
+                },
+            )
+            sent.raise_for_status()
+            marked = await client.patch(
+                root + f"/notification_test_admins?user_key=eq.{user_key}",
+                headers=_supabase_headers(supabase_secret_key, prefer="return=minimal"),
+                json={"last_test_sent_at": now_utc.isoformat()},
+            )
+            marked.raise_for_status()
+    except (PermissionError, NotificationStorageError, NotificationTestCooldownError):
+        raise
+    except (KeyError, TypeError, ValueError, ZoneInfoNotFoundError, httpx.HTTPError) as exc:
+        raise NotificationStorageError("Test delivery is unavailable") from exc
+    return {"sent": True}
 
 
 async def save_notification_subscription(

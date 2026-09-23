@@ -26,9 +26,11 @@ from .analytics import (
 )
 from .notifications import (
     NotificationStorageError,
+    NotificationTestCooldownError,
     dispatch_due_notifications,
     notification_status,
     save_notification_subscription,
+    send_test_notification,
 )
 
 app = FastAPI(
@@ -232,6 +234,32 @@ async def run_due_notifications(
         raise HTTPException(status_code=401, detail="Invalid scheduler token") from exc
     except (NotificationStorageError, httpx.HTTPError) as exc:
         raise HTTPException(status_code=502, detail="Notification delivery is unavailable") from exc
+
+
+@app.post("/v1/notifications/test")
+async def test_notification(request: TelegramRequest) -> dict:
+    identity = _telegram_identity(request.init_data)
+    supabase_url, supabase_secret_key = _supabase_settings()
+    bot_token = os.getenv("ORBITA_BOT_TOKEN", "")
+    if not bot_token:
+        raise HTTPException(status_code=503, detail="Telegram integration is not configured")
+    try:
+        return await send_test_notification(
+            supabase_url=supabase_url,
+            supabase_secret_key=supabase_secret_key,
+            user_key=identity.user_key,
+            bot_token=bot_token,
+            web_app_url=os.getenv(
+                "ORBITA_WEB_APP_URL",
+                "https://orbita-poc.vladplazmus.chatgpt.site/?startapp=daily_forecast",
+            ),
+        )
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail="Test delivery is not allowed") from exc
+    except NotificationTestCooldownError as exc:
+        raise HTTPException(status_code=429, detail="Wait before sending another test") from exc
+    except NotificationStorageError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
 
 
 @lru_cache(maxsize=256)
