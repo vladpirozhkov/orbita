@@ -1,5 +1,5 @@
-Warning: truncated output (original token count: 30525)
-Total output lines: 285
+Warning: truncated output (original token count: 31016)
+Total output lines: 300
 
 const $=(s,c=document)=>c.querySelector(s);const $$=(s,c=document)=>[...c.querySelectorAll(s)];
 const months=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
@@ -29,7 +29,7 @@ let notificationEnabled=null;
 let notificationHour=Math.min(23,Math.max(0,Number(localStorage.getItem('orbita-notification-hour')??9)||0));
 const notificationHourLabel=hour=>`${String(hour).padStart(2,'0')}:00`;
 async function fetchNotificationStatus(){
-  if(!apiBase||!telegramApp?.initData)return false;
+  if(!apiBase||!telegramApp?.initData)return {enabled:false,hour:notificationHour};
   const response=await fetch(`${apiBase}/v1/notifications/status`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({init_data:telegramApp.initData})});
   if(!response.ok)throw new Error('Не удалось проверить настройки');
   const data=await response.json();
@@ -48,41 +48,56 @@ async function setNotificationSubscription(enabled,preferredHour=notificationHou
   const response=await fetch(`${apiBase}/v1/notifications/subscription`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
   if(!response.ok)throw new Error(response.status===401?'Перезапусти приложение через Telegram':'Не удалось сохранить настройку');
   const data=await response.json();
+  const previousEnabled=notificationEnabled;
   notificationEnabled=Boolean(data.enabled);
   notificationHour=Math.min(23,Math.max(0,Number(data.preferred_hour??hour)||0));
   localStorage.setItem('orbita-notification-hour',String(notificationHour));
-  trackAnalytics(notificationEnabled?'daily_notification_enabled':'daily_notification_disabled');
+  if(previousEnabled!==notificationEnabled)trackAnalytics(notificationEnabled?'daily_notification_enabled':'daily_notification_disabled');
   return {enabled:notificationEnabled,hour:notificationHour};
 }
-async function openMenu(){
+function openMenu(){
+  notificationSettingsRequest++;
   const dark=document.documentElement.dataset.theme==='dark';
-  const hourOptions=Array.from({length:24},(_,hour)=>`<option value="${hour}"${hour===notificationHour?' selected':''}>${notificationHourLabel(hour)}</option>`).join('');
-  content.innerHTML=`<div class="app-menu"><div class="eyebrow">МЕНЮ</div><h2>Орбита</h2><button data-menu-view="profile">Профиль <span>→</span></button><button class="notification-menu" data-notification-toggle aria-pressed="false"><span>Прогноз в Telegram</span><i class="menu-switch" aria-hidden="true"></i></button><label class="notification-time-row"><span>Время отправки</span><span class="notification-time-control"><select data-notification-hour aria-label="Время отправки прогноза">${hourOptions}</select><i>⌄</i></span></label><p class="notification-privacy">По местному часовому поясу. Данные рождения сохраняются на сервере только для подготовки прогноза.</p><button data-theme-toggle>${dark?'Светлая':'Тёмная'} тема <span>${dark?'☼':'☾'}</span></button></div>`;
+  content.innerHTML=`<div class="app-menu"><div class="eyebrow">МЕНЮ</div><h2>Орбита</h2><button data-menu-view="profile">Профиль <span>→</span></button><button data-notification-settings>Прогноз в Telegram <span>→</span></button><button data-theme-toggle>${dark?'Светлая':'Тёмная'} тема <span>${dark?'☼':'☾'}</span></button></div>`;
   modal.showModal();
   $$('[data-menu-view]',content).forEach(button=>button.onclick=()=>{modal.close();showView(button.dataset.menuView)});
+  $('[data-notification-settings]',content).onclick=openNotificationSettings;
   $('[data-theme-toggle]',content).onclick=()=>{setTheme(dark?'light':'dark');modal.close();toast(dark?'Светлая тема включена':'Тёмная тема включена')};
+}
+let notificationSettingsRequest=0;
+async function openNotificationSettings(){
+  const requestId=++notificationSettingsRequest;
+  const hourOptions=Array.from({length:24},(_,hour)=>`<option value="${hour}"${hour===notificationHour?' selected':''}>${notificationHourLabel(hour)}</option>`).join('');
+  content.innerHTML=`<div class="notification-settings"><button class="notification-settings-back" data-notification-back>←&nbsp;&nbsp;Меню</button><div class="eyebrow">НАСТРОЙКИ</div><h2>Прогноз в Telegram</h2><div class="notification-settings-group"><button class="notification-setting-row notification-toggle-row" data-notification-toggle aria-pressed="false"><span class="notification-setting-copy"><strong>Получать ежедневный прогноз в Telegram</strong><small data-notification-status>Проверяем настройку…</small></span><i class="menu-switch" aria-hidden="true"></i></button><label class="notification-setting-row notification-time-row"><span>Время отправки</span><span class="notification-time-control"><select data-notification-hour aria-label="Время отправки прогноза">${hourOptions}</select><i>⌄</i></span></label></div><p class="notification-privacy">По местному часовому поясу. По умолчанию — 09:00. Данные рождения сохраняются на сервере только для подготовки и отправки прогноза.</p></div>`;
+  modal.showModal();
+  $('[data-notification-back]',content).onclick=openMenu;
   const toggle=$('[data-notification-toggle]',content);
   const timeSelect=$('[data-notification-hour]',content);
-  const paint=state=>{const enabled=typeof state==='object'?state.enabled:state;toggle.classList.toggle('is-on',enabled);toggle.setAttribute('aria-pressed',String(enabled));timeSelect.value=String(notificationHour)};
-  paint(notificationEnabled===true);
+  const status=$('[data-notification-status]',content);
+  const paint=(state,message='')=>{const enabled=Boolean(typeof state==='object'?state.enabled:state);toggle.classList.toggle('is-on',enabled);toggle.setAttribute('aria-pressed',String(enabled));status.textContent=message||(enabled?`Включён · ежедневно в ${notificationHourLabel(notificationHour)}`:'Выключен');timeSelect.value=String(notificationHour)};
+  const lock=locked=>{toggle.disabled=locked;timeSelect.disabled=locked};
+  paint(notificationEnabled===true,'Проверяем настройку…');
+  lock(true);
   toggle.onclick=async()=>{
     const next=!notificationEnabled;
-    toggle.disabled=true;
-    try{paint(await setNotificationSubscription(next,notificationHour));toast(next?`Прогноз включён на ${notificationHourLabel(notificationHour)}`:'Ежедневный прогноз выключен')}
-    catch(error){toast(error.message);if(next&&!profileComplete(readProfile())){modal.close();showView('profile')}}
-    finally{toggle.disabled=false}
+    lock(true);paint(notificationEnabled===true,'Сохраняем…');
+    try{await setNotificationSubscription(next,notificationHour);const confirmed=await fetchNotificationStatus();paint(confirmed);toast(confirmed.enabled?`Прогноз включён на ${notificationHourLabel(notificationHour)}`:'Ежедневный прогноз выключен')}
+    catch(error){paint(notificationEnabled===true);toast(error.message);if(next&&!profileComplete(readProfile())){modal.close();showView('profile')}}
+    finally{lock(false)}
   };
   timeSelect.onchange=async()=>{
     const previous=notificationHour;
     notificationHour=Number(timeSelect.value);
     localStorage.setItem('orbita-notification-hour',String(notificationHour));
-    if(notificationEnabled!==true){toast(`Время выбрано: ${notificationHourLabel(notificationHour)}`);return}
-    timeSelect.disabled=true;
-    try{paint(await setNotificationSubscription(true,notificationHour));toast(`Прогноз придёт в ${notificationHourLabel(notificationHour)}`)}
-    catch(error){notificationHour=previous;timeSelect.value=String(previous);localStorage.setItem('orbita-notification-hour',String(previous));toast(error.message)}
-    finally{timeSelect.disabled=false}
+    if(notificationEnabled!==true){paint(false);toast(`Время выбрано: ${notificationHourLabel(notificationHour)}`);return}
+    lock(true);paint(true,'Сохраняем время…');
+    try{await setNotificationSubscription(true,notificationHour);const confirmed=await fetchNotificationStatus();paint(confirmed);toast(`Прогноз придёт в ${notificationHourLabel(notificationHour)}`)}
+    catch(error){notificationHour=previous;timeSelect.value=String(previous);localStorage.setItem('orbita-notification-hour',String(previous));paint(true);toast(error.message)}
+    finally{lock(false)}
   };
-  try{paint(await fetchNotificationStatus())}catch{}
+  try{const confirmed=await fetchNotificationStatus();if(requestId===notificationSettingsRequest)paint(confirmed)}
+  catch(error){if(requestId===notificationSettingsRequest)paint(notificationEnabled===true,'Не удалось проверить настройку')}
+  finally{if(requestId===notificationSettingsRequest)lock(false)}
 }
 $('[data-action="menu"]').onclick=openMenu;
 setTheme(document.documentElement.dataset.theme||'light');
@@ -222,8 +237,7 @@ const aspectCopy={conjunction:'Эти две темы включаются од�
 function interpretationItem(title,meta,text){return `<article class="interpretation-item"><div><strong>${escapeHTML(cleanInterpretationText(title))}</strong><small>${escapeHTML(cleanInterpretationText(meta))}</small></div><p>${escapeHTML(cleanInterpretationText(text))}</p></article>`}
 function interpretationSection(title,subtitle,items,open=false){return `<details class="interpretation-section" ${open?'open':''}><summary><span><strong>${title}</strong><small>${subtitle}</small></span><b>＋</b></summary><div class="interpretation-list">${items}</div></details>`}
 function planetInSignItems(chart){return Object.entries(chart.planets).map(([key,point])=>{const planet=planetNames[key]||key,sign=signNames[point.sign]||point.sign,voice=planetVoice[key]||{verb:'проявляешь важную часть характера',gift:'действовать осознанно',shadow:'уходить в крайность'},profile=signPortrait[point.sign]||{},retro=point.retrograde?' · ретроградная фаза':'';const text=`В твоей карте это положение показывает, как ты ${voice.verb}: через способность ${signStyle[point.sign]||'действовать по-своему'}. Оно даёт ${profile.gift||voice.gift}. В сильной форме ты умеешь ${voice.gift}; в напряжённой можешь ${voice.shadow}. Практический ориентир — ${signWatch[point.sign]||'сверять реакцию с реальной ситуацией'}.`;return interpretationItem(`${planet} в знаке ${sign}`,`${point.degree_in_sign.toFixed(1)}°${retro}`,text)}).join('')}
-function planetInHouseItems(chart){return Object.entries(chart.planets).map(([key,point])=>{const planet=planetNames[key]||key,voice=planetVoice[key]||{},sphere=houseTheme[point.house]||'личный опыт';const text=`Вопросы ${sphere} — место, где ${planet.toLowerCase()} становится особенно заметным. Здесь ты чаще ${voice.verb||'проявляешь эту часть характера'}, поэтому события этой области быстрее включают мотивацию, выбор и повторяющиеся реакции. Сильная сторона положения — ${voice.gift||'осознанно использовать свой ресурс'}. Если возникает напряжение, проверь, не начинаешь ли ты ${voice.shadow||'действовать автоматически'}.`;return interpretationItem(`${planet} в ${point.house} доме`,`Где проявляется: ${sphere}`,text)}).join('')}
-function natalAspectItems(chart){if(!chart.aspects?.length)return interpretationItem('Крупных аспектов не найдено','В пределах выбранных орбисов','Это не означает, что карта пустая. Просто основные планеты не образуют точных мажорных аспектов в пределах используемых допусков, поэтому больший вес получают их знаки и дома.');return chart.aspects.map(row=>{const left=planetNames[row.from]||row.from,right=planetNames[row.to]||row.to,name=aspectNames[row.type]||row.type,first=planetRoleAccusative[row.from]||'одну часть характера',second=planetRoleAccusative[row.to]||'другую часть характера',leftVoice=planetVoice[row.from]?.verb||'проявляешь одну потребность',rightVoice=planetVoice[row.to]?.verb||'проявляешь другую потребность';const openings={conjunction:`Когда ты ${leftVoice}, одновременно включается и то, как ты ${rightVoice}. Поэтому ${first} и ${second} трудно разделить: они усиливают друг друга и быстро становятся заметны окружающим.`,sextile:`То, как ты ${leftVoice}, создаёт возможность увереннее проявлять и то, как ты ${rightVoice}. Связь между ${first} и ${second} раскрывается лучше всего после твоего собственного шага.`,trine:`То, как…525 tokens truncated…use=>{const sign=signNames[house.sign]||house.sign,sphere=houseTheme[house.number]||'эта область жизни',profile=signPortrait[house.sign]||{};const text=`К вопросам ${sphere} ты подходишь в стиле знака ${sign}: стремишься ${signStyle[house.sign]}. Это помогает проявлять ${profile.gift||'сильные качества знака'} именно в этой области. Сложность возникает, когда выбранный стиль становится единственно возможным. Тогда полезно ${signWatch[house.sign]}.`;return interpretationItem(`${house.number} дом в знаке ${sign}`,`${house.degree_in_sign.toFixed(1)}° ${sign}`,text)}).join('')}
+function planetInHouseItems(chart){return Object.entries(chart.planets).map(([key,point])=>{const planet=planetNames[key]||key,voice=planetVoice[key]||{},sphere=houseTheme[point.house]||'личный опыт';const text=`Вопросы ${sphere} — место, где ${planet.toLowerCase()} становится особенно заметным. Здесь ты чаще ${voice.verb||'проявляешь эту часть характера'}, поэтому события этой области быстрее включают мотивацию, выбор и повторяющиеся реакции. Сильная сторона положения — ${voice.gift||'осознанно использовать свой ресурс'}. Ес…1016 tokens truncated…use=>{const sign=signNames[house.sign]||house.sign,sphere=houseTheme[house.number]||'эта область жизни',profile=signPortrait[house.sign]||{};const text=`К вопросам ${sphere} ты подходишь в стиле знака ${sign}: стремишься ${signStyle[house.sign]}. Это помогает проявлять ${profile.gift||'сильные качества знака'} именно в этой области. Сложность возникает, когда выбранный стиль становится единственно возможным. Тогда полезно ${signWatch[house.sign]}.`;return interpretationItem(`${house.number} дом в знаке ${sign}`,`${house.degree_in_sign.toFixed(1)}° ${sign}`,text)}).join('')}
 function signFromLongitude(longitude){return Object.keys(signNames)[Math.floor((((longitude||0)%360)+360)%360/30)]||'Aries'}
 function natalSynthesis(chart){const sun=chart.planets.Sun,moon=chart.planets.Moon,ascKey=signFromLongitude(chart.angles.ascendant),sunP=signPortrait[sun.sign],moonP=signPortrait[moon.sign],ascP=signPortrait[ascKey],venus=chart.planets.Venus,mars=chart.planets.Mars,venusP=signPortrait[venus?.sign]||sunP,marsP=signPortrait[mars?.sign]||sunP;return `<section class="natal-synthesis"><article><small>ГЛАВНОЕ О ТЕБЕ</small><h3>Характер, чувства и то, как тебя видят</h3><p>В основе характера — ${sunP.gift}. Тебе важно ${sunP.need}. При этом эмоционально ты ищешь ${moonP.need}, поэтому внешняя уверенность и внутренние реакции могут двигаться в разном темпе. При знакомстве окружающие скорее замечают ${ascP.gift}. За этим первым впечатлением раскрывается более сложное сочетание: ты одновременно стремишься ${signStyle[sun.sign]} и нуждаешься в том, чтобы ${signStyle[moon.sign]}.</p></article><article><small>В ОТНОШЕНИЯХ</small><p>Тебе особенно важны ${venusP.relation}. Притяжение возникает не только из-за чувств: нужен человек, рядом с которым можно сохранить ${sunP.need}. Желания ты проявляешь через стремление ${signStyle[mars?.sign]||'действовать прямо'}. Полезно заранее говорить о потребностях, а не ждать, что партнёр распознает их без слов.</p></article><article><small>В РАБОТЕ И РЕАЛИЗАЦИИ</small><p>Лучше всего раскрываются задачи, где есть ${sunP.work}. Твоя опора — ${sunP.gift}, а способ добиваться результата связан со стремлением ${signStyle[mars?.sign]||'последовательно действовать'}. Если работа требует постоянно подавлять эту часть характера, мотивация быстро становится формальной.</p></article><article><small>ГЛАВНЫЙ ОРИЕНТИР</small><p>Не своди себя к одному знаку. Солнце описывает направление воли, Луна — внутреннюю опору, Асцендент — способ входить в жизнь. Твоя задача — не выбирать между ними, а дать каждой части подходящее место: действовать из своих ценностей, замечать эмоциональную реакцию и осознанно выбирать, как проявляться.</p></article></section>`}
 function renderNatal(chart,person='',partnerMode=false){const sun=chart.planets.Sun,moon=chart.planets.Moon;const sunSign=signNames[sun.sign]||sun.sign,moonSign=signNames[moon.sign]||moon.sign,asc=zodiac(chart.angles.ascendant);const sections=interpretationSection('Планеты в знаках','Как именно ты думаешь, чувствуешь, выбираешь и действуешь',planetInSignItems(chart),true)+interpretationSection('Планеты в домах','Где эти качества сильнее влияют на события и решения',planetInHouseItems(chart))+interpretationSection('Аспекты','Какие части характера поддерживают друг друга, а какие требуют баланса',natalAspectItems(chart))+interpretationSection('Дома в знаках','В каком стиле ты входишь в каждую жизненную сферу',houseInSignItems(chart));content.innerHTML=`<div class="result-copy natal-result"><div class="eyebrow">${person?`КАРТА · ${escapeHTML(person)}`:'НАТАЛЬНАЯ КАРТА'} · SWISS EPHEMERIS</div>${partnerMode?'<button class="secondary-btn partner-edit-data partner-edit-top" type="button">Изменить данные партнёра</button>':''}<div class="result-wheel"><span>☉</span></div><h2>${person?`${escapeHTML(person)}: чтение натальной карты`:'Чтение натальной карты'}</h2><section class="natal-overview"><div><small>СОЛНЦЕ</small><strong>${sunSign}</strong></div><div><small>ЛУНА</small><strong>${moonSign}</strong></div><div><small>АСЦЕНДЕНТ</small><strong>${asc}</strong></div></section>${natalSynthesis(chart)}<p class="natal-lead">Ниже — подробный разбор четырёх слоёв карты. Открывай разделы по одному; незнакомые понятия можно найти в словаре.</p><div class="interpretation-sections">${sections}</div><p><small>Положения планет, домов и аспекты рассчитаны с помощью Swiss Ephemeris. Трактовка создана для саморефлексии и не является научным выводом или неизбежным прогнозом.</small></p><button class="primary-btn" onclick="document.querySelector('#modal').close()">Готово</button></div>`;if(partnerMode)$('.partner-edit-data',content).onclick=()=>openPartnerForm('chart')}

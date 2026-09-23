@@ -630,19 +630,29 @@ html[data-theme="dark"] .app-loader-logo span{color:#E7BE75}
 html[data-theme="dark"] .app-loader-progress i{background:#E7BE75}
 @media(prefers-reduced-motion:reduce){.app-loader-progress i{animation-duration:2.4s}.app-loader{transition:none}}
 
-/* Daily Telegram forecast toggle */
-.app-menu .notification-menu{align-items:center}
+/* Daily Telegram forecast settings */
+.notification-settings{display:grid;gap:8px}
+.notification-settings h2{margin:2px 0 14px;font:600 26px Manrope,system-ui,sans-serif}
+.notification-settings-back{justify-self:start;margin:0 0 10px;padding:8px 0;border:0;background:transparent;color:var(--muted);font:600 14px Manrope,system-ui,sans-serif;cursor:pointer}
+.notification-settings-group{overflow:hidden;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.22)}
+.notification-setting-row{display:flex;align-items:center;justify-content:space-between;gap:18px;width:100%;min-height:72px;padding:14px 16px;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--ink);font:500 16px Manrope,system-ui,sans-serif;text-align:left}
+.notification-setting-row:last-child{border-bottom:0}
+.notification-setting-copy{display:grid;gap:5px;min-width:0}
+.notification-setting-copy strong{font:600 15px/1.35 Manrope,system-ui,sans-serif}
+.notification-setting-copy small{color:var(--muted);font:500 12px/1.35 Manrope,system-ui,sans-serif}
+.notification-toggle-row{cursor:pointer}
 .menu-switch{position:relative;flex:0 0 46px;width:46px;height:28px;border-radius:999px;background:rgba(105,109,92,.2);transition:background .2s ease}
 .menu-switch::after{content:"";position:absolute;top:4px;left:4px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(32,34,27,.2);transition:transform .2s ease}
-.notification-menu.is-on .menu-switch{background:#696D5C}
-.notification-menu.is-on .menu-switch::after{transform:translateX(18px)}
-.notification-menu:disabled{opacity:.6;cursor:wait}
-.notification-time-row{display:flex;align-items:center;justify-content:space-between;gap:18px;min-height:58px;padding:0 4px;border-bottom:1px solid var(--line);font-size:16px;color:var(--text)}
+.notification-toggle-row.is-on .menu-switch{background:#696D5C}
+.notification-toggle-row.is-on .menu-switch::after{transform:translateX(18px)}
+.notification-toggle-row:disabled{opacity:.65;cursor:wait}
+.notification-time-row{min-height:58px}
 .notification-time-control{position:relative;display:flex;align-items:center;gap:7px;color:var(--muted)}
 .notification-time-control select{appearance:none;-webkit-appearance:none;min-width:68px;margin:0;padding:8px 18px 8px 8px;border:0;background:transparent;color:inherit;font:inherit;text-align:right;outline:none}
 .notification-time-control i{position:absolute;right:1px;top:50%;font-style:normal;font-size:15px;transform:translateY(-56%);pointer-events:none}
 .notification-time-control select:focus-visible{border-radius:10px;box-shadow:0 0 0 2px rgba(105,109,92,.35)}
 .notification-time-control select:disabled{opacity:.55}
-.notification-privacy{margin:0;padding:10px 4px 5px;color:var(--muted);font-size:12px;line-height:1.45}
+.notification-privacy{margin:0;padding:10px 4px 5px;color:var(--muted);font-size:12px;line-height:1.5}
 html[data-theme="dark"] .menu-switch{background:rgba(255,255,255,.14)}
-html[data-theme="dark"] .notification-menu.is-on .menu-switch{background:#e7be75}
+html[data-theme="dark"] .notification-toggle-row.is-on .menu-switch{background:#e7be75}
+html[data-theme="dark"] .notification-settings-group{background:rgba(255,255,255,.035)}
