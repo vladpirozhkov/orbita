@@ -631,15 +631,18 @@ html[data-theme="dark"] .app-loader-progress i{background:#E7BE75}
 @media(prefers-reduced-motion:reduce){.app-loader-progress i{animation-duration:2.4s}.app-loader{transition:none}}
 
 /* Daily Telegram forecast toggle */
-.app-menu .notification-menu{align-items:center;padding:13px 4px}
-.notification-menu>span{display:grid;gap:2px;min-width:0}
-.notification-menu strong{font-size:16px;font-weight:700}
-.notification-menu small{color:var(--muted);font-size:13px;font-weight:500}
+.app-menu .notification-menu{align-items:center}
 .menu-switch{position:relative;flex:0 0 46px;width:46px;height:28px;border-radius:999px;background:rgba(105,109,92,.2);transition:background .2s ease}
 .menu-switch::after{content:"";position:absolute;top:4px;left:4px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(32,34,27,.2);transition:transform .2s ease}
 .notification-menu.is-on .menu-switch{background:#696D5C}
 .notification-menu.is-on .menu-switch::after{transform:translateX(18px)}
 .notification-menu:disabled{opacity:.6;cursor:wait}
-.notification-privacy{margin:-1px 4px 5px;color:var(--muted);font-size:12px;line-height:1.45}
+.notification-time-row{display:flex;align-items:center;justify-content:space-between;gap:18px;min-height:58px;padding:0 4px;border-bottom:1px solid var(--line);font-size:16px;color:var(--text)}
+.notification-time-control{position:relative;display:flex;align-items:center;gap:7px;color:var(--muted)}
+.notification-time-control select{appearance:none;-webkit-appearance:none;min-width:68px;margin:0;padding:8px 18px 8px 8px;border:0;background:transparent;color:inherit;font:inherit;text-align:right;outline:none}
+.notification-time-control i{position:absolute;right:1px;top:50%;font-style:normal;font-size:15px;transform:translateY(-56%);pointer-events:none}
+.notification-time-control select:focus-visible{border-radius:10px;box-shadow:0 0 0 2px rgba(105,109,92,.35)}
+.notification-time-control select:disabled{opacity:.55}
+.notification-privacy{margin:0;padding:10px 4px 5px;color:var(--muted);font-size:12px;line-height:1.45}
 html[data-theme="dark"] .menu-switch{background:rgba(255,255,255,.14)}
 html[data-theme="dark"] .notification-menu.is-on .menu-switch{background:#e7be75}

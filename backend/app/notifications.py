@@ -34,11 +34,11 @@ async def notification_status(
     supabase_url: str,
     supabase_secret_key: str,
     user_key: str,
-) -> bool:
+) -> dict[str, Any]:
     url = (
         supabase_url.rstrip("/")
         + "/rest/v1/notification_subscriptions"
-        + f"?select=enabled&user_key=eq.{user_key}&limit=1"
+        + f"?select=enabled,preferred_hour&user_key=eq.{user_key}&limit=1"
     )
     try:
         async with httpx.AsyncClient(timeout=6.0) as client:
@@ -47,7 +47,12 @@ async def notification_status(
             rows = response.json()
     except (httpx.HTTPError, ValueError) as exc:
         raise NotificationStorageError("Notification settings are unavailable") from exc
-    return bool(rows and rows[0].get("enabled"))
+    if not rows:
+        return {"enabled": False, "preferred_hour": 9}
+    return {
+        "enabled": bool(rows[0].get("enabled")),
+        "preferred_hour": int(rows[0].get("preferred_hour", 9)),
+    }
 
 
 async def save_notification_subscription(

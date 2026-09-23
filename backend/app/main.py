@@ -158,14 +158,14 @@ async def get_notification_status(request: TelegramRequest) -> dict:
     identity = _telegram_identity(request.init_data)
     supabase_url, supabase_secret_key = _supabase_settings()
     try:
-        enabled = await notification_status(
+        status = await notification_status(
             supabase_url=supabase_url,
             supabase_secret_key=supabase_secret_key,
             user_key=identity.user_key,
         )
     except NotificationStorageError as exc:
         raise HTTPException(status_code=502, detail="Notification settings are unavailable") from exc
-    return {"enabled": enabled, "preferred_hour": 9}
+    return status
 
 
 @app.post("/v1/notifications/subscription")
