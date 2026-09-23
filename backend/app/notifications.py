@@ -151,7 +151,6 @@ async def send_test_notification(
                 json={
                     "chat_id": row["telegram_chat_id"],
                     "text": _notification_text(forecast),
-                    "parse_mode": "HTML",
                     "reply_markup": {
                         "inline_keyboard": [[{
                             "text": "Открыть полный прогноз",
@@ -262,7 +261,7 @@ def _daily_orientation(forecast: dict[str, Any]) -> str:
 def _notification_text(forecast: dict[str, Any]) -> str:
     orientation = _daily_orientation(forecast)
     return (
-        f"Привет! <b>{orientation}</b> Уже подготовили твой подробный прогноз на сегодня ✨\n\n"
+        f"Привет! {orientation} Уже подготовили твой подробный прогноз на сегодня ✨\n\n"
         "Зайди в приложение, чтобы узнать, чего ожидать от сегодняшнего дня!"
     )
 
@@ -360,7 +359,6 @@ async def dispatch_due_notifications(
                     json={
                         "chat_id": row["telegram_chat_id"],
                         "text": _notification_text(forecast),
-                        "parse_mode": "HTML",
                         "reply_markup": {
                             "inline_keyboard": [[{
                                 "text": "Открыть полный прогноз",

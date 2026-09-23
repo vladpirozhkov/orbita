@@ -19,8 +19,9 @@ def test_notification_text_is_short_and_non_technical():
 
     text = _notification_text(forecast)
 
-    assert text.startswith("Привет! <b>Тебе сегодня лучше не спешить")
-    assert "</b> Уже подготовили твой подробный прогноз на сегодня ✨" in text
+    assert text.startswith("Привет! Тебе сегодня лучше не спешить")
+    assert "обычного. Уже подготовили твой подробный прогноз на сегодня ✨" in text
+    assert "<b>" not in text
     assert text.endswith("Зайди в приложение, чтобы узнать, чего ожидать от сегодняшнего дня!")
     assert len(text) < 300
     assert "Луна" not in text
