@@ -215,7 +215,7 @@ async def dispatch_due_notifications(
             local_now = now_utc.astimezone(ZoneInfo(row["timezone"]))
         except (KeyError, ZoneInfoNotFoundError):
             continue
-        if local_now.hour != int(row.get("preferred_hour", 9)):
+        if local_now.hour != int(row.get("preferred_hour", 9)) or local_now.minute != 0:
             continue
         if row.get("last_sent_local_date") == local_now.date().isoformat():
             continue
