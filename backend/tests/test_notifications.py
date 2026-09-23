@@ -1,4 +1,7 @@
-from app.notifications import _notification_text
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
+from app.notifications import _next_send_at, _notification_text
 
 
 def test_notification_text_is_short_and_non_technical():
@@ -23,3 +26,15 @@ def test_notification_text_is_short_and_non_technical():
     assert "Луна" not in text
     assert "транзит" not in text.lower()
     assert "сделать акцент на том, чтобы" not in text
+
+
+def test_next_send_at_uses_the_subscribers_local_hour():
+    before = datetime(2026, 9, 23, 3, 0, tzinfo=ZoneInfo("UTC"))
+    after = datetime(2026, 9, 23, 5, 0, tzinfo=ZoneInfo("UTC"))
+
+    assert _next_send_at("Asia/Yekaterinburg", 9, before) == datetime(
+        2026, 9, 23, 4, 0, tzinfo=ZoneInfo("UTC")
+    )
+    assert _next_send_at("Asia/Yekaterinburg", 9, after) == datetime(
+        2026, 9, 24, 4, 0, tzinfo=ZoneInfo("UTC")
+    )

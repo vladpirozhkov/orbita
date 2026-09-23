@@ -5,7 +5,6 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 import os
 from datetime import date, datetime, time
-from functools import lru_cache
 from typing import Any
 from uuid import UUID
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
@@ -14,7 +13,6 @@ import httpx
 from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
-from timezonefinder import TimezoneFinder
 
 from .astrology import calculate_daily_forecast, calculate_natal_chart, interpret_natal_chart
 from .analytics import (
@@ -32,6 +30,7 @@ from .notifications import (
     save_notification_subscription,
     send_test_notification,
 )
+from .places import search_cities
 
 app = FastAPI(
     title="Orbita API",
@@ -54,7 +53,6 @@ app.add_middleware(
     allow_methods=["GET", "POST"],
     allow_headers=["Content-Type"],
 )
-timezone_finder = TimezoneFinder(in_memory=True)
 
 
 class NatalChartRequest(BaseModel):
@@ -262,47 +260,12 @@ async def test_notification(request: TelegramRequest) -> dict:
         raise HTTPException(status_code=502, detail=str(exc)) from exc
 
 
-@lru_cache(maxsize=256)
-def _timezone_at(latitude: float, longitude: float) -> str | None:
-    return timezone_finder.timezone_at(lat=latitude, lng=longitude)
-
-
 @app.get("/v1/places/search")
 async def search_places(q: str) -> list[dict]:
     query = q.strip()
     if len(query) < 2:
         raise HTTPException(status_code=422, detail="Enter at least two characters")
-    headers = {"User-Agent": os.getenv("NOMINATIM_USER_AGENT", "Orbita/0.1")}
-    params = {
-        "q": query,
-        "format": "jsonv2",
-        "addressdetails": 1,
-        "limit": 5,
-        "accept-language": "ru",
-    }
-    try:
-        async with httpx.AsyncClient(timeout=8.0) as client:
-            response = await client.get(
-                os.getenv("GEOCODER_URL", "https://nominatim.openstreetmap.org/search"),
-                params=params,
-                headers=headers,
-            )
-            response.raise_for_status()
-    except httpx.HTTPError as exc:
-        raise HTTPException(status_code=502, detail="Place search is temporarily unavailable") from exc
-    places = []
-    for item in response.json():
-        latitude = float(item["lat"])
-        longitude = float(item["lon"])
-        timezone_name = _timezone_at(round(latitude, 4), round(longitude, 4))
-        if timezone_name:
-            places.append({
-                "label": item["display_name"],
-                "latitude": latitude,
-                "longitude": longitude,
-                "timezone": timezone_name,
-            })
-    return places
+    return search_cities(query, limit=5)
 
 
 @app.post("/v1/natal-chart")

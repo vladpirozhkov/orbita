@@ -6,7 +6,7 @@ import asyncio
 import hashlib
 import hmac
 import os
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, time, timedelta
 from typing import Any
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
@@ -24,6 +24,15 @@ class NotificationTestCooldownError(RuntimeError):
     """Raised when an admin requests test delivery too frequently."""
 
 
+class TelegramDeliveryError(RuntimeError):
+    """A Telegram delivery failed and may be retried."""
+
+    def __init__(self, message: str, *, retry_after: int | None = None, permanent: bool = False):
+        super().__init__(message)
+        self.retry_after = retry_after
+        self.permanent = permanent
+
+
 def _supabase_headers(secret_key: str, *, prefer: str | None = None) -> dict[str, str]:
     headers = {"apikey": secret_key, "Content-Type": "application/json"}
     if not secret_key.startswith("sb_secret_"):
@@ -31,6 +40,17 @@ def _supabase_headers(secret_key: str, *, prefer: str | None = None) -> dict[str
     if prefer:
         headers["Prefer"] = prefer
     return headers
+
+
+def _next_send_at(timezone_name: str, preferred_hour: int, now_utc: datetime | None = None) -> datetime:
+    zone = ZoneInfo(timezone_name)
+    reference = now_utc or datetime.now(tz=ZoneInfo("UTC"))
+    local_now = reference.astimezone(zone)
+    local_date = local_now.date()
+    candidate = datetime.combine(local_date, time(hour=preferred_hour), tzinfo=zone)
+    if candidate <= local_now:
+        candidate = datetime.combine(local_date + timedelta(days=1), time(hour=preferred_hour), tzinfo=zone)
+    return candidate.astimezone(ZoneInfo("UTC"))
 
 
 async def notification_status(
@@ -188,6 +208,10 @@ async def save_notification_subscription(
                 "latitude": profile["latitude"],
                 "longitude": profile["longitude"],
                 "preferred_hour": profile.get("preferred_hour", 9),
+                "next_send_at": _next_send_at(
+                    profile["timezone"],
+                    int(profile.get("preferred_hour", 9)),
+                ).isoformat(),
                 "updated_at": datetime.utcnow().isoformat() + "Z",
             }
             response = await client.post(
@@ -258,37 +282,70 @@ async def dispatch_due_notifications(
     ):
         raise PermissionError("Invalid scheduler token")
 
-    base_url = supabase_url.rstrip("/") + "/rest/v1/notification_subscriptions"
-    query = (
-        "?select=user_key,telegram_chat_id,timezone,birth_date,birth_time,latitude,"
-        "longitude,preferred_hour,last_sent_local_date&enabled=eq.true"
-    )
-    async with httpx.AsyncClient(timeout=12.0) as client:
-        response = await client.get(base_url + query, headers=_supabase_headers(supabase_secret_key))
-        response.raise_for_status()
-        subscriptions = response.json()
+    root = supabase_url.rstrip("/") + "/rest/v1"
+    headers = _supabase_headers(supabase_secret_key)
+    dispatch_limit = max(1, min(int(os.getenv("NOTIFICATION_DISPATCH_LIMIT", "5000")), 5000))
+    batch_size = max(1, min(int(os.getenv("NOTIFICATION_BATCH_SIZE", "100")), 100))
+    rate_per_second = max(1, min(int(os.getenv("TELEGRAM_MESSAGES_PER_SECOND", "20")), 25))
 
-    now_utc = datetime.now(tz=ZoneInfo("UTC"))
-    due: list[tuple[dict[str, Any], datetime]] = []
-    for row in subscriptions:
-        try:
-            local_now = now_utc.astimezone(ZoneInfo(row["timezone"]))
-        except (KeyError, ZoneInfoNotFoundError):
-            continue
-        if local_now.hour != int(row.get("preferred_hour", 9)) or local_now.minute != 0:
-            continue
-        if row.get("last_sent_local_date") == local_now.date().isoformat():
-            continue
-        due.append((row, local_now))
+    class RateLimiter:
+        def __init__(self, rate: int):
+            self.interval = 1 / rate
+            self.next_slot = 0.0
+            self.lock = asyncio.Lock()
 
-    semaphore = asyncio.Semaphore(8)
+        async def wait(self) -> None:
+            async with self.lock:
+                loop = asyncio.get_running_loop()
+                delay = self.next_slot - loop.time()
+                if delay > 0:
+                    await asyncio.sleep(delay)
+                self.next_slot = loop.time() + self.interval
 
-    async def send_one(row: dict[str, Any], local_now: datetime) -> str:
-        async with semaphore:
+    limiter = RateLimiter(rate_per_second)
+    counts = {"queued": 0, "claimed": 0, "sent": 0, "retry": 0, "failed": 0, "disabled": 0}
+
+    async with httpx.AsyncClient(timeout=15.0) as client:
+        enqueued = await client.post(
+            f"{root}/rpc/enqueue_due_notification_deliveries",
+            headers=headers,
+            json={"p_limit": dispatch_limit},
+        )
+        enqueued.raise_for_status()
+        counts["queued"] = int(enqueued.json() or 0)
+
+        async def mark_delivery(
+            delivery_id: int,
+            *,
+            status: str,
+            error: str | None = None,
+            retry_after: int | None = None,
+        ) -> None:
+            now = datetime.now(tz=ZoneInfo("UTC"))
+            payload: dict[str, Any] = {
+                "status": status,
+                "locked_until": None,
+                "last_error": error[:500] if error else None,
+                "updated_at": now.isoformat(),
+            }
+            if status == "sent":
+                payload["sent_at"] = now.isoformat()
+            if status == "retry":
+                payload["next_attempt_at"] = (now + timedelta(seconds=retry_after or 900)).isoformat()
+            response = await client.patch(
+                f"{root}/notification_deliveries?id=eq.{delivery_id}",
+                headers=_supabase_headers(supabase_secret_key, prefer="return=minimal"),
+                json=payload,
+            )
+            response.raise_for_status()
+
+        async def send_one(row: dict[str, Any]) -> str:
+            attempts = int(row["attempts"])
             try:
-                birth_datetime = datetime.fromisoformat(
-                    f"{row['birth_date']}T{row['birth_time']}"
-                )
+                zone = ZoneInfo(row["timezone"])
+                local_date = date.fromisoformat(row["local_date"])
+                forecast_moment = datetime.combine(local_date, time(hour=12), tzinfo=zone)
+                birth_datetime = datetime.fromisoformat(f"{row['birth_date']}T{row['birth_time']}")
                 chart = calculate_natal_chart(
                     birth_datetime=birth_datetime,
                     timezone_name=row["timezone"],
@@ -296,50 +353,92 @@ async def dispatch_due_notifications(
                     longitude=float(row["longitude"]),
                     house_system="P",
                 )
-                forecast = calculate_daily_forecast(chart, local_now)
-                payload = {
-                    "chat_id": row["telegram_chat_id"],
-                    "text": _notification_text(forecast),
-                    "parse_mode": "HTML",
-                    "reply_markup": {
-                        "inline_keyboard": [[{
-                            "text": "Открыть полный прогноз",
-                            "web_app": {"url": web_app_url},
-                        }]],
-                    },
-                }
-                async with httpx.AsyncClient(timeout=12.0) as client:
-                    sent = await client.post(
-                        f"https://api.telegram.org/bot{bot_token}/sendMessage",
-                        json=payload,
-                    )
-                    if sent.status_code == 403:
-                        await client.patch(
-                            f"{base_url}?user_key=eq.{row['user_key']}",
-                            headers=_supabase_headers(supabase_secret_key, prefer="return=minimal"),
-                            json={"enabled": False, "updated_at": datetime.utcnow().isoformat() + "Z"},
-                        )
-                        return "disabled"
-                    sent.raise_for_status()
-                    updated = await client.patch(
-                        f"{base_url}?user_key=eq.{row['user_key']}",
-                        headers=_supabase_headers(supabase_secret_key, prefer="return=minimal"),
-                        json={
-                            "last_sent_local_date": local_now.date().isoformat(),
-                            "last_sent_at": datetime.utcnow().isoformat() + "Z",
-                            "updated_at": datetime.utcnow().isoformat() + "Z",
+                forecast = calculate_daily_forecast(chart, forecast_moment)
+                await limiter.wait()
+                sent = await client.post(
+                    f"https://api.telegram.org/bot{bot_token}/sendMessage",
+                    json={
+                        "chat_id": row["telegram_chat_id"],
+                        "text": _notification_text(forecast),
+                        "parse_mode": "HTML",
+                        "reply_markup": {
+                            "inline_keyboard": [[{
+                                "text": "Открыть полный прогноз",
+                                "web_app": {"url": web_app_url},
+                            }]],
                         },
-                    )
+                    },
+                )
+                if sent.status_code == 403:
+                    raise TelegramDeliveryError("Bot was blocked by the user", permanent=True)
+                if sent.status_code == 429:
+                    try:
+                        retry_after = int(sent.json().get("parameters", {}).get("retry_after", 60))
+                    except (TypeError, ValueError):
+                        retry_after = 60
+                    raise TelegramDeliveryError("Telegram rate limit", retry_after=retry_after)
+                if 400 <= sent.status_code < 500:
+                    raise TelegramDeliveryError(f"Telegram rejected message ({sent.status_code})", permanent=True)
+                sent.raise_for_status()
+                now = datetime.now(tz=ZoneInfo("UTC"))
+                await mark_delivery(int(row["delivery_id"]), status="sent")
+                updated = await client.patch(
+                    f"{root}/notification_subscriptions?user_key=eq.{row['user_key']}",
+                    headers=_supabase_headers(supabase_secret_key, prefer="return=minimal"),
+                    json={
+                        "last_sent_local_date": row["local_date"],
+                        "last_sent_at": now.isoformat(),
+                        "updated_at": now.isoformat(),
+                    },
+                )
+                try:
                     updated.raise_for_status()
+                except httpx.HTTPError:
+                    # The durable delivery row is authoritative; a failed legacy
+                    # timestamp update must not cause a duplicate Telegram message.
+                    pass
                 return "sent"
-            except (KeyError, TypeError, ValueError, httpx.HTTPError, ZoneInfoNotFoundError):
-                return "failed"
+            except TelegramDeliveryError as exc:
+                if exc.permanent:
+                    status = "cancelled" if "blocked" in str(exc).lower() else "failed"
+                    await mark_delivery(int(row["delivery_id"]), status=status, error=str(exc))
+                    if status == "cancelled":
+                        disabled = await client.patch(
+                            f"{root}/notification_subscriptions?user_key=eq.{row['user_key']}",
+                            headers=_supabase_headers(supabase_secret_key, prefer="return=minimal"),
+                            json={"enabled": False, "updated_at": datetime.now(tz=ZoneInfo('UTC')).isoformat()},
+                        )
+                        disabled.raise_for_status()
+                        return "disabled"
+                    return "failed"
+                retry_after = exc.retry_after or min(3600, 60 * (5 ** max(0, attempts - 1)))
+                status = "failed" if attempts >= 5 else "retry"
+                await mark_delivery(int(row["delivery_id"]), status=status, error=str(exc), retry_after=retry_after)
+                return status
+            except (KeyError, TypeError, ValueError, ZoneInfoNotFoundError, httpx.HTTPError) as exc:
+                status = "failed" if attempts >= 5 else "retry"
+                retry_after = min(3600, 60 * (5 ** max(0, attempts - 1)))
+                await mark_delivery(
+                    int(row["delivery_id"]),
+                    status=status,
+                    error=f"{type(exc).__name__}: {exc}",
+                    retry_after=retry_after,
+                )
+                return status
 
-    results = await asyncio.gather(*(send_one(row, local_now) for row, local_now in due))
-    return {
-        "checked": len(subscriptions),
-        "due": len(due),
-        "sent": results.count("sent"),
-        "failed": results.count("failed"),
-        "disabled": results.count("disabled"),
-    }
+        while counts["claimed"] < dispatch_limit:
+            claim = await client.post(
+                f"{root}/rpc/claim_notification_deliveries",
+                headers=headers,
+                json={"p_limit": min(batch_size, dispatch_limit - counts["claimed"])},
+            )
+            claim.raise_for_status()
+            deliveries = claim.json()
+            if not deliveries:
+                break
+            counts["claimed"] += len(deliveries)
+            results = await asyncio.gather(*(send_one(row) for row in deliveries))
+            for result in results:
+                counts[result] += 1
+
+    return counts

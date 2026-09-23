@@ -15,12 +15,13 @@
 
 - `dist` — статический интерфейс Telegram Mini App;
 - `backend/app/astrology.py` — детерминированный расчёт планет, домов и аспектов;
-- `backend/app/main.py` — FastAPI, поиск места и определение часового пояса;
+- `backend/app/main.py` — FastAPI и расчётные endpoints;
+- `backend/app/places.py` — локальный поиск города и часового пояса по снимку GeoNames;
 - `backend/Dockerfile` — контейнер для публикации расчётного API.
 
 Перед публикацией укажите адрес API в `dist/config.js`, а origin интерфейса —
-в переменной `ORBITA_ALLOWED_ORIGINS` backend-сервиса. Для публичного геокодера
-также задайте корректный `NOMINATIM_USER_AGENT` с контактным адресом.
+в переменной `ORBITA_ALLOWED_ORIGINS` backend-сервиса. Поиск городов работает
+локально и не отправляет пользовательские запросы внешнему геокодеру.
 
 ## Запуск расчётного API
 
@@ -72,10 +73,18 @@ ORBITA_BOT_TOKEN=<токен @orbita_natal_bot>
 SUPABASE_URL=https://<project-ref>.supabase.co
 SUPABASE_SECRET_KEY=sb_secret_...
 TELEGRAM_INIT_DATA_MAX_AGE_SECONDS=86400
+NOTIFICATION_DISPATCH_LIMIT=5000
+NOTIFICATION_BATCH_SIZE=100
+TELEGRAM_MESSAGES_PER_SECOND=20
 ```
 
 Секретный ключ Supabase и токен бота должны находиться только в переменных
 backend-сервиса. Их нельзя добавлять в frontend, GitHub или `dist/config.js`.
+
+Ежедневные сообщения сначала попадают в сохраняемую очередь Supabase. Временные
+ошибки Telegram повторяются до пяти раз с увеличивающимся интервалом, а скорость
+отправки ограничена безопасным значением. Сырые аналитические события хранятся
+90 дней и автоматически очищаются ежедневным заданием базы данных.
 
 Сводка DAU, WAU, MAU, новых пользователей, сессий и запусков доступна в
 Supabase SQL Editor:
