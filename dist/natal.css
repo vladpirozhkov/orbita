@@ -629,3 +629,17 @@ html[data-theme="dark"] .app-loader-logo{color:#F7F1E6}
 html[data-theme="dark"] .app-loader-logo span{color:#E7BE75}
 html[data-theme="dark"] .app-loader-progress i{background:#E7BE75}
 @media(prefers-reduced-motion:reduce){.app-loader-progress i{animation-duration:2.4s}.app-loader{transition:none}}
+
+/* Daily Telegram forecast toggle */
+.app-menu .notification-menu{align-items:center;padding:13px 4px}
+.notification-menu>span{display:grid;gap:2px;min-width:0}
+.notification-menu strong{font-size:16px;font-weight:700}
+.notification-menu small{color:var(--muted);font-size:13px;font-weight:500}
+.menu-switch{position:relative;flex:0 0 46px;width:46px;height:28px;border-radius:999px;background:rgba(105,109,92,.2);transition:background .2s ease}
+.menu-switch::after{content:"";position:absolute;top:4px;left:4px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(32,34,27,.2);transition:transform .2s ease}
+.notification-menu.is-on .menu-switch{background:#696D5C}
+.notification-menu.is-on .menu-switch::after{transform:translateX(18px)}
+.notification-menu:disabled{opacity:.6;cursor:wait}
+.notification-privacy{margin:-1px 4px 5px;color:var(--muted);font-size:12px;line-height:1.45}
+html[data-theme="dark"] .menu-switch{background:rgba(255,255,255,.14)}
+html[data-theme="dark"] .notification-menu.is-on .menu-switch{background:#e7be75}

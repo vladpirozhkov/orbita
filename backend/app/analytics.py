@@ -58,6 +58,7 @@ class AnalyticsStorageError(RuntimeError):
 @dataclass(frozen=True)
 class TelegramAnalyticsIdentity:
     user_key: str
+    telegram_user_id: int
     language_code: str | None
     is_premium: bool | None
     start_param: str | None
@@ -108,7 +109,13 @@ def validate_telegram_init_data(
     language_code = str(user.get("language_code", ""))[:16] or None
     is_premium = user.get("is_premium") if isinstance(user.get("is_premium"), bool) else None
     start_param = str(values.get("start_param", ""))[:64] or None
-    return TelegramAnalyticsIdentity(user_key, language_code, is_premium, start_param)
+    return TelegramAnalyticsIdentity(
+        user_key,
+        telegram_user_id,
+        language_code,
+        is_premium,
+        start_param,
+    )
 
 
 def sanitize_metadata(metadata: dict[str, Any]) -> dict[str, str | int | float | bool | None]:

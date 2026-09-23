@@ -8,10 +8,10 @@ from datetime import date, datetime, time
 from functools import lru_cache
 from typing import Any
 from uuid import UUID
-from zoneinfo import ZoneInfo
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import httpx
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from timezonefinder import TimezoneFinder
@@ -23,6 +23,12 @@ from .analytics import (
     InvalidTelegramData,
     store_analytics_batch,
     validate_telegram_init_data,
+)
+from .notifications import (
+    NotificationStorageError,
+    dispatch_due_notifications,
+    notification_status,
+    save_notification_subscription,
 )
 
 app = FastAPI(
@@ -75,6 +81,20 @@ class AnalyticsBatchRequest(BaseModel):
     events: list[AnalyticsEvent] = Field(min_length=1, max_length=20)
 
 
+class TelegramRequest(BaseModel):
+    init_data: str = Field(min_length=1, max_length=8192)
+
+
+class NotificationSubscriptionRequest(TelegramRequest):
+    enabled: bool
+    birth_date: date | None = None
+    birth_time: time | None = None
+    timezone: str | None = Field(default=None, max_length=64)
+    latitude: float | None = Field(default=None, ge=-90, le=90)
+    longitude: float | None = Field(default=None, ge=-180, le=180)
+    preferred_hour: int = Field(default=9, ge=0, le=23)
+
+
 @app.get("/health")
 def health() -> dict:
     return {"status": "ok"}
@@ -109,6 +129,109 @@ async def analytics_events(request: AnalyticsBatchRequest) -> dict:
     except (AnalyticsStorageError, ValueError) as exc:
         raise HTTPException(status_code=502, detail="Analytics is temporarily unavailable") from exc
     return {"accepted": stored}
+
+
+def _telegram_identity(init_data: str):
+    bot_token = os.getenv("ORBITA_BOT_TOKEN", "")
+    if not bot_token:
+        raise HTTPException(status_code=503, detail="Telegram integration is not configured")
+    try:
+        return validate_telegram_init_data(
+            init_data,
+            bot_token,
+            max_age_seconds=int(os.getenv("TELEGRAM_INIT_DATA_MAX_AGE_SECONDS", "86400")),
+        )
+    except (InvalidTelegramData, ValueError) as exc:
+        raise HTTPException(status_code=401, detail="Telegram session is invalid") from exc
+
+
+def _supabase_settings() -> tuple[str, str]:
+    supabase_url = os.getenv("SUPABASE_URL", "")
+    supabase_secret_key = os.getenv("SUPABASE_SECRET_KEY", "")
+    if not supabase_url or not supabase_secret_key:
+        raise HTTPException(status_code=503, detail="Notification storage is not configured")
+    return supabase_url, supabase_secret_key
+
+
+@app.post("/v1/notifications/status")
+async def get_notification_status(request: TelegramRequest) -> dict:
+    identity = _telegram_identity(request.init_data)
+    supabase_url, supabase_secret_key = _supabase_settings()
+    try:
+        enabled = await notification_status(
+            supabase_url=supabase_url,
+            supabase_secret_key=supabase_secret_key,
+            user_key=identity.user_key,
+        )
+    except NotificationStorageError as exc:
+        raise HTTPException(status_code=502, detail="Notification settings are unavailable") from exc
+    return {"enabled": enabled, "preferred_hour": 9}
+
+
+@app.post("/v1/notifications/subscription")
+async def update_notification_subscription(request: NotificationSubscriptionRequest) -> dict:
+    identity = _telegram_identity(request.init_data)
+    supabase_url, supabase_secret_key = _supabase_settings()
+    profile = None
+    if request.enabled:
+        if (
+            not request.birth_date
+            or not request.birth_time
+            or not request.timezone
+            or request.latitude is None
+            or request.longitude is None
+        ):
+            raise HTTPException(status_code=422, detail="Complete birth profile is required")
+        if request.birth_date and request.birth_date > date.today():
+            raise HTTPException(status_code=422, detail="Birth date cannot be in the future")
+        try:
+            ZoneInfo(request.timezone or "")
+        except ZoneInfoNotFoundError as exc:
+            raise HTTPException(status_code=422, detail="Unknown timezone") from exc
+        profile = {
+            "birth_date": request.birth_date.isoformat(),
+            "birth_time": request.birth_time.isoformat(),
+            "timezone": request.timezone,
+            "latitude": request.latitude,
+            "longitude": request.longitude,
+            "preferred_hour": request.preferred_hour,
+        }
+    try:
+        enabled = await save_notification_subscription(
+            supabase_url=supabase_url,
+            supabase_secret_key=supabase_secret_key,
+            identity=identity,
+            profile=profile,
+            enabled=request.enabled,
+        )
+    except NotificationStorageError as exc:
+        raise HTTPException(status_code=502, detail="Notification settings are unavailable") from exc
+    return {"enabled": enabled, "preferred_hour": request.preferred_hour}
+
+
+@app.post("/v1/notifications/run")
+async def run_due_notifications(
+    x_orbita_cron_token: str = Header(default="", alias="X-Orbita-Cron-Token"),
+) -> dict:
+    bot_token = os.getenv("ORBITA_BOT_TOKEN", "")
+    supabase_url, supabase_secret_key = _supabase_settings()
+    if not bot_token:
+        raise HTTPException(status_code=503, detail="Telegram integration is not configured")
+    try:
+        return await dispatch_due_notifications(
+            cron_token=x_orbita_cron_token,
+            supabase_url=supabase_url,
+            supabase_secret_key=supabase_secret_key,
+            bot_token=bot_token,
+            web_app_url=os.getenv(
+                "ORBITA_WEB_APP_URL",
+                "https://orbita-poc.vladplazmus.chatgpt.site/?startapp=daily_forecast",
+            ),
+        )
+    except PermissionError as exc:
+        raise HTTPException(status_code=401, detail="Invalid scheduler token") from exc
+    except (NotificationStorageError, httpx.HTTPError) as exc:
+        raise HTTPException(status_code=502, detail="Notification delivery is unavailable") from exc
 
 
 @lru_cache(maxsize=256)
