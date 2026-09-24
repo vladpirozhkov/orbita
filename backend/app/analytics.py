@@ -33,6 +33,9 @@ ALLOWED_EVENT_NAMES = frozenset({
     "daily_notification_enabled",
     "daily_notification_disabled",
     "daily_notification_opened",
+    "forecast_share_clicked",
+    "forecast_shared",
+    "referral_opened",
 })
 
 ALLOWED_METADATA_KEYS = frozenset({
@@ -44,6 +47,8 @@ ALLOWED_METADATA_KEYS = frozenset({
     "theme",
     "cached",
     "sphere",
+    "referral_code",
+    "share_method",
 })
 
 
@@ -163,8 +168,9 @@ async def store_analytics_batch(
         "last_platform": platform,
         "language_code": identity.language_code,
         "is_premium": identity.is_premium,
-        "last_start_param": identity.start_param,
     }
+    if identity.start_param is not None:
+        update_row["last_start_param"] = identity.start_param
     event_rows = [{
         "event_id": str(event["event_id"]),
         "user_key": identity.user_key,

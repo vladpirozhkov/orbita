@@ -5,7 +5,7 @@ from urllib.parse import urlencode
 
 import pytest
 
-from app.analytics import InvalidTelegramData, sanitize_metadata, validate_telegram_init_data
+from app.analytics import ALLOWED_EVENT_NAMES, InvalidTelegramData, sanitize_metadata, validate_telegram_init_data
 
 
 BOT_TOKEN = "123456789:test-token"
@@ -66,6 +66,12 @@ def test_metadata_drops_sensitive_or_unknown_values():
         "dream_text": "private",
         "source": "x" * 100,
         "nested": {"unsafe": True},
+        "referral_code": "a1b2c3d4e5f6",
+        "share_method": "native_file",
     })
 
-    assert result == {"view": "today", "query_length": 8, "source": "x" * 80}
+    assert result == {"view": "today", "query_length": 8, "source": "x" * 80, "referral_code": "a1b2c3d4e5f6", "share_method": "native_file"}
+
+
+def test_referral_and_share_events_are_allowed():
+    assert {"forecast_share_clicked", "forecast_shared", "referral_opened"} <= ALLOWED_EVENT_NAMES

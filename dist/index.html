@@ -38,7 +38,13 @@
         <div class="eyebrow">ПРОГНОЗ ПО НАТАЛЬНОЙ КАРТЕ · <span id="forecast-date">СЕГОДНЯ</span></div>
         <h2 id="forecast-headline">Добавь данные рождения</h2>
         <p id="forecast-summary">Заполни профиль — Орбита рассчитает транзиты к твоей натальной карте.</p>
-        <button class="text-link" data-modal="forecast">Подробнее <span>→</span></button>
+        <div class="forecast-actions">
+          <button class="text-link" data-modal="forecast">Подробнее <span>→</span></button>
+          <button class="forecast-share" type="button" data-share-forecast aria-label="Поделиться прогнозом">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.5M8.2 13.2l7.6 4.5"/></svg>
+            <span>Поделиться</span>
+          </button>
+        </div>
       </article>
 
       <div class="section-heading"><h3>Твои сферы</h3><span>сегодня</span></div>
@@ -110,6 +116,6 @@
   <div id="toast" role="status"></div>
   <script src="./config.js?v=50"></script>
   <script src="./matrix-data.js?v=54"></script>
-  <script src="./app.js?v=56"></script>
+  <script src="./app.js?v=57"></script>
 </body>
 </html>

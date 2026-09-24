@@ -665,3 +665,12 @@ html[data-theme="dark"] .notification-toggle-row.is-on .menu-switch{background:#
 html[data-theme="dark"] .notification-settings-group{background:rgba(255,255,255,.035)}
 html[data-theme="dark"] .notification-test-panel{background:rgba(255,255,255,.035)}
 html[data-theme="dark"] .notification-test-button{background:#e7be75;color:#171326}
+
+/* Forecast sharing */
+.forecast-actions{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:8px}
+.forecast-share{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:42px;padding:9px 14px;border:1px solid rgba(105,109,92,.22);border-radius:999px;background:rgba(231,232,214,.62);color:#565B4C;font:700 13px Nunito,system-ui,sans-serif;cursor:pointer}
+.forecast-share svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.forecast-share:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.forecast-share:disabled{opacity:.55;cursor:wait}
+html[data-theme="dark"] .forecast-share{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.13);color:#e7be75}
+@media(max-width:370px){.forecast-actions{align-items:stretch;flex-direction:column}.forecast-actions .text-link{text-align:left}.forecast-share{align-self:flex-start}}
